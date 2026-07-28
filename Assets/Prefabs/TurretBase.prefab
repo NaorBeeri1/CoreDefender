@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 492851781696976095}
   m_Layer: 0
   m_Name: TurretBase
-  m_TagString: Untagged
+  m_TagString: Turret
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -104,7 +104,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 01b58cdf75286234ab428f4b1d96ff93, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TurretController
-  turretData: {fileID: 11400000, guid: 27ce4fe7511d2a04fb37fbcbadf47b5d, type: 2}
+  originalTurretData: {fileID: 11400000, guid: 27ce4fe7511d2a04fb37fbcbadf47b5d, type: 2}
   bulletPrefab: {fileID: 6367061635586260010, guid: ccfc1bda9fbde964ba39659b1ea8876e, type: 3}
   turretCanvasPrefab: {fileID: 2470467838436904971, guid: 536a99ea2cd1e2a479e0a433f52a9708, type: 3}
-  upgradeCanvasPrefab: {fileID: 1250129490283322081, guid: 7ce3dc603da39a54b8f46e81d126a245, type: 3}

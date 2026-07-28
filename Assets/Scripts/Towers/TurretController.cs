@@ -5,13 +5,14 @@ using UnityEngine.InputSystem;
 public class TurretController : MonoBehaviour
 {
     [Header("Data Profile")]
-    [SerializeField] private TurretData turretData;
+    [SerializeField] private TurretData originalTurretData; // Assign StandardTurretData here in Prefab
+    private TurretData turretData;                           // Unique runtime instance copy
 
     [Header("Combat References")]
     [SerializeField] private GameObject bulletPrefab;
 
     [Header("UI References")]
-    [SerializeField] private GameObject turretCanvasPrefab; // Heat bar canvas
+    [SerializeField] private GameObject turretCanvasPrefab;
     private GameObject activeHeatCanvas;
     private Image fillBarImage;
 
@@ -19,11 +20,19 @@ public class TurretController : MonoBehaviour
     private float fireCooldown = 0f;
     private bool isOverheated = false;
     private Transform currentTarget;
-    private bool isUpgraded = false;
 
     private void Start()
     {
-        // Instantiate the floating heat bar tightly above the turret head
+        if (originalTurretData != null)
+        {
+            // INSTANTIATE A UNIQUE RUNTIME COPY SO UPGRADES DON'T SHARE ACROSS TURRETS
+            turretData = Instantiate(originalTurretData);
+            turretData.currentUpgradeLevel = 0;
+            turretData.damage = 50; 
+            turretData.fireRate = 1f;
+            Debug.Log($"[CoreDefender] Unique {turretData.turretName} instantiated with Damage: {turretData.damage}");
+        }
+
         if (turretCanvasPrefab != null)
         {
             activeHeatCanvas = Instantiate(turretCanvasPrefab, transform.position + new Vector3(0f, 0.65f, 0f), Quaternion.identity, transform);
@@ -39,8 +48,6 @@ public class TurretController : MonoBehaviour
     {
         if (turretData == null) return;
 
-        // Note: When game is paused (Time.timeScale == 0), Update stops executing. 
-        // We use unscaled time checks or allow mouse raycasts during pause for UI selection.
         HandleCooling();
         FindNearestEnemy();
 
@@ -48,7 +55,6 @@ public class TurretController : MonoBehaviour
         
         if (currentTarget != null && fireCooldown <= (1f / turretData.fireRate) && !isOverheated)
         {
-            // Only shoot if game is active
             if (Time.timeScale > 0f)
             {
                 Shoot();
@@ -62,7 +68,6 @@ public class TurretController : MonoBehaviour
 
     private void HandleSelectionInput()
     {
-        // Allow clicking even when paused (Time.timeScale == 0) by checking Input directly
         bool isClicked = Mouse.current != null ? Mouse.current.leftButton.wasPressedThisFrame : Input.GetMouseButtonDown(0);
 
         if (isClicked && Time.timeScale >= 0f)
@@ -82,20 +87,20 @@ public class TurretController : MonoBehaviour
         }
     }
 
-    public bool IsUpgraded() => isUpgraded;
-    public int GetUpgradeCost() => turretData != null ? turretData.upgradeCost : 150;
+    public TurretData GetTurretData() => turretData;
 
     public void ExecuteUpgrade()
     {
-        if (isUpgraded || turretData == null) return;
+        if (turretData == null || turretData.currentUpgradeLevel >= turretData.maxUpgradeLevel) return;
 
         if (PlayerStats.Instance != null && PlayerStats.Instance.SpendCredits(turretData.upgradeCost))
         {
-            isUpgraded = true;
+            turretData.currentUpgradeLevel++;
+            turretData.damage += turretData.damageUpgradeBonus; // Tier 1: 75, Tier 2: 100
             turretData.fireRate *= turretData.fireRateMultiplier;
-            turretData.damage += turretData.damageUpgradeBonus;
+            turretData.coolingRate *= turretData.coolingRateMultiplier;
 
-            Debug.Log($"[CoreDefender] {turretData.turretName} upgraded! New Fire Rate: {turretData.fireRate}, New Damage: {turretData.damage}");
+            Debug.Log($"[CoreDefender] Upgraded unique turret to Tier {turretData.currentUpgradeLevel}! Damage: {turretData.damage}");
         }
     }
 
@@ -136,6 +141,7 @@ public class TurretController : MonoBehaviour
             if (projectile != null)
             {
                 projectile.SetTarget(currentTarget);
+                projectile.SetDamage(turretData.damage);
             }
         }
 
@@ -144,7 +150,6 @@ public class TurretController : MonoBehaviour
         if (currentHeat >= turretData.maxHeat)
         {
             isOverheated = true;
-            Debug.LogWarning($"[CoreDefender] {turretData.turretName} OVERHEATED!");
         }
     }
 

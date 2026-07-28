@@ -16,7 +16,13 @@ MonoBehaviour:
   cost: 100
   fireRate: 1
   attackRange: 5
-  damage: 25
+  damage: 50
   maxHeat: 100
   heatPerShot: 15
-  coolingRate: 25
+  coolingRate: 60
+  currentUpgradeLevel: 0
+  maxUpgradeLevel: 3
+  upgradeCost: 150
+  fireRateMultiplier: 1.2
+  damageUpgradeBonus: 25
+  coolingRateMultiplier: 1.5

@@ -7,18 +7,21 @@ public class TurretData : ScriptableObject
     public string turretName = "Standard Turret";
     public int cost = 100;
 
-    [Header("Combat Stats")]
-    public float fireRate = 1f;       // Shots per second
+    [Header("Base Combat Stats")]
+    public float fireRate = 2.5f;     
     public float attackRange = 5f;
-    public int damage = 25;
+    public int damage = 50;           
 
-    [Header("Thermal Limits")]
+    [Header("Thermal Limits & Cooling")]
     public float maxHeat = 100f;
     public float heatPerShot = 15f;
-    public float coolingRate = 25f;   // Heat lost per second when idle
+    public float coolingRate = 40f;   // <-- HIGHER NUMBER = FASTER COOLING (RELOAD SPEED)
 
-    [Header("Upgrade Scaling")]
+    [Header("Multi-Tier Upgrades")]
+    public int currentUpgradeLevel = 0;
+    public int maxUpgradeLevel = 3;
     public int upgradeCost = 150;
-    public float fireRateMultiplier = 1.25f;
-    public int damageUpgradeBonus = 10;
+    public float fireRateMultiplier = 1.2f;
+    public int damageUpgradeBonus = 25; 
+    public float coolingRateMultiplier = 1.5f; // Upgrades make it cool down 50% faster!
 }

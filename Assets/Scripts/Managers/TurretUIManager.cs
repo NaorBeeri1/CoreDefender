@@ -8,6 +8,7 @@ public class TurretUIManager : MonoBehaviour
 
     [Header("UI Panel References")]
     [SerializeField] private GameObject upgradePanel;
+    [SerializeField] private TextMeshProUGUI statsDisplayText;
     [SerializeField] private Button upgradeButton;
     [SerializeField] private TextMeshProUGUI upgradeButtonText;
     [SerializeField] private Button closeButton;
@@ -52,17 +53,45 @@ public class TurretUIManager : MonoBehaviour
             upgradePanel.SetActive(true);
         }
 
-        // Pause the game like a true tactical pause screen
+        // Pause gameplay
         Time.timeScale = 0f;
 
-        if (selectedTurret.IsUpgraded())
+        // Force an immediate layout update
+        UpdateMenuDisplay();
+    }
+
+    public void UpdateMenuDisplay()
+    {
+        if (selectedTurret == null) return;
+
+        TurretData data = selectedTurret.GetTurretData();
+        if (data == null) return;
+
+        if (data.currentUpgradeLevel >= data.maxUpgradeLevel)
         {
+            if (statsDisplayText != null)
+            {
+                statsDisplayText.text = $"MAX TIER REACHED (Tier {data.currentUpgradeLevel}/{data.maxUpgradeLevel})\n\n" +
+                                        $"Current Damage: {data.damage} HP\n" +
+                                        $"Current Fire Rate: {data.fireRate:F1} /s\n" +
+                                        $"Attack Range: {data.attackRange}";
+            }
             if (upgradeButtonText != null) upgradeButtonText.text = "MAXED OUT";
             if (upgradeButton != null) upgradeButton.interactable = false;
         }
         else
         {
-            if (upgradeButtonText != null) upgradeButtonText.text = $"UPGRADE ({selectedTurret.GetUpgradeCost()}c)";
+            int nextDamage = data.damage + data.damageUpgradeBonus;
+            float nextFireRate = data.fireRate * data.fireRateMultiplier;
+
+            if (statsDisplayText != null)
+            {
+                statsDisplayText.text = $"Tactic Level: Tier {data.currentUpgradeLevel} / {data.maxUpgradeLevel}\n\n" +
+                                        $"Damage: {data.damage} HP  ->  <color=#1AE6FF>{nextDamage} HP</color>\n" +
+                                        $"Fire Rate: {data.fireRate:F1}/s  ->  <color=#1AE6FF>{nextFireRate:F1}/s</color>\n" +
+                                        $"Range: {data.attackRange}";
+            }
+            if (upgradeButtonText != null) upgradeButtonText.text = $"UPGRADE ({data.upgradeCost}c)";
             if (upgradeButton != null) upgradeButton.interactable = true;
         }
     }
@@ -84,7 +113,7 @@ public class TurretUIManager : MonoBehaviour
         if (selectedTurret != null)
         {
             selectedTurret.ExecuteUpgrade();
-            CloseMenu();
+            UpdateMenuDisplay();
         }
     }
 }

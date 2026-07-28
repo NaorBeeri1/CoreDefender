@@ -4,7 +4,7 @@ public class ProjectileController : MonoBehaviour
 {
     [Header("Projectile Stats")]
     [SerializeField] private float speed = 10f;
-    [SerializeField] private int damage = 25;
+    [SerializeField] private int damage = 50;
 
     private Transform target;
 
@@ -13,11 +13,16 @@ public class ProjectileController : MonoBehaviour
         target = enemyTarget;
     }
 
+    public void SetDamage(int damageAmount)
+    {
+        damage = damageAmount;
+    }
+
     private void Update()
     {
         if (target == null)
         {
-            gameObject.SetActive(false); // Return to pool instead of destroying
+            gameObject.SetActive(false);
             return;
         }
 
@@ -37,6 +42,6 @@ public class ProjectileController : MonoBehaviour
         {
             enemy.TakeDamage(damage);
         }
-        gameObject.SetActive(false); // Return to pool instead of destroying
+        gameObject.SetActive(false);
     }
 }

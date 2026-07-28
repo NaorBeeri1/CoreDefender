@@ -5,30 +5,28 @@ public class EnemyController : MonoBehaviour
 {
     [Header("Enemy Stats")]
     [SerializeField] private float moveSpeed = 3f;
-    [SerializeField] private int maxHealth = 50;
+    [SerializeField] private int maxHealth = 100;
     [SerializeField] private int damageToCore = 10;
-
-    [Header("Economy Reward")]
     [SerializeField] private int creditReward = 25;
 
     [Header("UI References")]
-    [SerializeField] private GameObject enemyCanvasPrefab; // Drag EnemyCanvas prefab here
+    [SerializeField] private GameObject enemyCanvasPrefab; 
     private GameObject activeCanvasInstance;
     private Image healthFillImage;
 
     private int currentHealth;
     private Transform targetCore;
     private CoreManager coreManager;
+    private float lastDamageTime = -1f;
 
     private void Start()
     {
+        maxHealth = 100;
         currentHealth = maxHealth;
 
-        // Instantiate the floating health bar tightly above the enemy head (offset Y = 0.65f)
         if (enemyCanvasPrefab != null)
         {
             activeCanvasInstance = Instantiate(enemyCanvasPrefab, transform.position + new Vector3(0f, 0.65f, 0f), Quaternion.identity, transform);
-            
             Transform fillTrans = activeCanvasInstance.transform.Find("BackgroundBar/FillBar");
             if (fillTrans != null)
             {
@@ -54,7 +52,6 @@ public class EnemyController : MonoBehaviour
         Vector3 destination = targetCore != null ? targetCore.position : Vector3.zero;
         transform.position = Vector3.MoveTowards(transform.position, destination, moveSpeed * Time.deltaTime);
 
-        // Keep world space canvas rotation locked/stable if parent moves
         if (activeCanvasInstance != null)
         {
             activeCanvasInstance.transform.position = transform.position + new Vector3(0f, 0.65f, 0f);
@@ -72,6 +69,10 @@ public class EnemyController : MonoBehaviour
 
     public void TakeDamage(int damage)
     {
+        // 0.15s gate allows rapid machine-gun fire while preventing frame-perfect stacking bugs
+        if (Time.time - lastDamageTime < 0.15f) return;
+        lastDamageTime = Time.time;
+
         currentHealth -= damage;
         if (currentHealth < 0) currentHealth = 0;
 
@@ -94,7 +95,6 @@ public class EnemyController : MonoBehaviour
     private void Die()
     {
         GameEventBus.TriggerEnemyDestroyed(creditReward);
-        Debug.Log("[CoreDefender] Enemy destroyed and bounty collected!");
         Destroy(gameObject);
     }
 }
