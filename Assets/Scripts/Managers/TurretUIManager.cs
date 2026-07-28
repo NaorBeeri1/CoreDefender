@@ -11,6 +11,7 @@ public class TurretUIManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI statsDisplayText;
     [SerializeField] private Button upgradeButton;
     [SerializeField] private TextMeshProUGUI upgradeButtonText;
+    [SerializeField] private Button sellButton;
     [SerializeField] private Button closeButton;
 
     private TurretController selectedTurret;
@@ -39,6 +40,11 @@ public class TurretUIManager : MonoBehaviour
             upgradeButton.onClick.AddListener(OnUpgradeClicked);
         }
 
+        if (sellButton != null)
+        {
+            sellButton.onClick.AddListener(OnSellClicked);
+        }
+
         if (closeButton != null)
         {
             closeButton.onClick.AddListener(CloseMenu);
@@ -56,7 +62,6 @@ public class TurretUIManager : MonoBehaviour
         // Pause gameplay
         Time.timeScale = 0f;
 
-        // Force an immediate layout update
         UpdateMenuDisplay();
     }
 
@@ -114,6 +119,15 @@ public class TurretUIManager : MonoBehaviour
         {
             selectedTurret.ExecuteUpgrade();
             UpdateMenuDisplay();
+        }
+    }
+
+    private void OnSellClicked()
+    {
+        if (selectedTurret != null)
+        {
+            selectedTurret.SellTurret();
+            CloseMenu();
         }
     }
 }

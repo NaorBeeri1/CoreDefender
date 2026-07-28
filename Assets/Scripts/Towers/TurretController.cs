@@ -194,4 +194,18 @@ public class TurretController : MonoBehaviour
             Gizmos.DrawWireSphere(transform.position, turretData.attackRange);
         }
     }
+    public void SellTurret()
+    {
+        // Calculate refund (e.g., base cost 100 + upgrades spent, refunding 75% or flat rate)
+        int refundAmount = 75; 
+
+        if (PlayerStats.Instance != null)
+        {
+            PlayerStats.Instance.AddCredits(refundAmount);
+            Debug.Log($"[CoreDefender] Turret sold for {refundAmount} credits.");
+        }
+
+        // Cleanly destroy this turret game object from the grid
+        Destroy(gameObject);
+    }
 }
