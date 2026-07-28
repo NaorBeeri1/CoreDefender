@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UI;
 
 public class TurretController : MonoBehaviour
 {
@@ -12,10 +13,31 @@ public class TurretController : MonoBehaviour
     [Header("Combat References")]
     [SerializeField] private GameObject bulletPrefab;
 
+    [Header("UI References")]
+    [SerializeField] private GameObject turretCanvasPrefab; // Drag TurretCanvas prefab here
+    private GameObject activeCanvasInstance;
+    private Image fillBarImage;
+
     private float currentHeat = 0f;
     private float fireCooldown = 0f;
     private bool isOverheated = false;
     private Transform currentTarget;
+
+    private void Start()
+    {
+        // Instantiate the floating heat bar canvas above the turret
+        if (turretCanvasPrefab != null)
+        {
+            activeCanvasInstance = Instantiate(turretCanvasPrefab, transform.position + new Vector3(0f, 1.2f, 0f), Quaternion.identity, transform);
+            
+            // Find the FillBar image inside the instantiated canvas
+            Transform fillTrans = activeCanvasInstance.transform.Find("BackgroundBar/FillBar");
+            if (fillTrans != null)
+            {
+                fillBarImage = fillTrans.GetComponent<Image>();
+            }
+        }
+    }
 
     private void Update()
     {
@@ -29,6 +51,8 @@ public class TurretController : MonoBehaviour
             Shoot();
             fireCooldown = 1f / fireRate;
         }
+
+        UpdateHeatUI();
     }
 
     private void FindNearestEnemy()
@@ -94,6 +118,25 @@ public class TurretController : MonoBehaviour
                     isOverheated = false;
                     Debug.Log("[CoreDefender] Turret cooled down. Operational again.");
                 }
+            }
+        }
+    }
+
+    private void UpdateHeatUI()
+    {
+        if (fillBarImage != null)
+        {
+            // Update fill amount based on current heat percentage
+            fillBarImage.fillAmount = currentHeat / maxHeat;
+
+            // Change color to bright red/pink (#FF1A4D) if overheated, or cyan (#1AE6FF) when normal
+            if (isOverheated)
+            {
+                fillBarImage.color = new Color(1f, 0.1f, 0.302f, 1f); // #FF1A4D
+            }
+            else
+            {
+                fillBarImage.color = new Color(0.102f, 0.902f, 1f, 1f); // #1AE6FF
             }
         }
     }

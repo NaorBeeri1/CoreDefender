@@ -110,3 +110,4 @@ MonoBehaviour:
   heatPerShot: 15
   coolingRate: 25
   bulletPrefab: {fileID: 6367061635586260010, guid: ccfc1bda9fbde964ba39659b1ea8876e, type: 3}
+  turretCanvasPrefab: {fileID: 2470467838436904971, guid: 536a99ea2cd1e2a479e0a433f52a9708, type: 3}
