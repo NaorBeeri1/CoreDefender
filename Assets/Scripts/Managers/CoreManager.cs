@@ -13,6 +13,16 @@ public class CoreManager : MonoBehaviour
         Debug.Log($"[CoreDefender] Core online. Current Health: {currentHealth}/{maxCoreHealth}");
     }
 
+    public int GetCurrentHealth()
+    {
+        return currentHealth;
+    }
+
+    public int GetMaxHealth()
+    {
+        return maxCoreHealth;
+    }
+
     public void TakeDamage(int damageAmount)
     {
         currentHealth -= damageAmount;
