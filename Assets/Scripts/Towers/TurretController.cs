@@ -3,18 +3,14 @@ using UnityEngine.UI;
 
 public class TurretController : MonoBehaviour
 {
-    [Header("Turret Stats")]
-    [SerializeField] private float fireRate = 1f; // Shots per second
-    [SerializeField] private float attackRange = 5f;
-    [SerializeField] private float maxHeat = 100f;
-    [SerializeField] private float heatPerShot = 15f;
-    [SerializeField] private float coolingRate = 25f; // Heat lost per second when idle
+    [Header("Data Profile")]
+    [SerializeField] private TurretData turretData; // Drag StandardTurretData here
 
     [Header("Combat References")]
     [SerializeField] private GameObject bulletPrefab;
 
     [Header("UI References")]
-    [SerializeField] private GameObject turretCanvasPrefab; // Drag TurretCanvas prefab here
+    [SerializeField] private GameObject turretCanvasPrefab; 
     private GameObject activeCanvasInstance;
     private Image fillBarImage;
 
@@ -30,7 +26,6 @@ public class TurretController : MonoBehaviour
         {
             activeCanvasInstance = Instantiate(turretCanvasPrefab, transform.position + new Vector3(0f, 0.65f, 0f), Quaternion.identity, transform);
             
-            // Find the FillBar image inside the instantiated canvas
             Transform fillTrans = activeCanvasInstance.transform.Find("BackgroundBar/FillBar");
             if (fillTrans != null)
             {
@@ -41,6 +36,8 @@ public class TurretController : MonoBehaviour
 
     private void Update()
     {
+        if (turretData == null) return;
+
         HandleCooling();
         FindNearestEnemy();
 
@@ -49,7 +46,7 @@ public class TurretController : MonoBehaviour
         if (currentTarget != null && fireCooldown <= 0f && !isOverheated)
         {
             Shoot();
-            fireCooldown = 1f / fireRate;
+            fireCooldown = 1f / turretData.fireRate;
         }
 
         UpdateHeatUI();
@@ -71,7 +68,7 @@ public class TurretController : MonoBehaviour
             }
         }
 
-        if (nearestEnemy != null && shortestDistance <= attackRange)
+        if (nearestEnemy != null && shortestDistance <= turretData.attackRange)
         {
             currentTarget = nearestEnemy;
         }
@@ -91,17 +88,18 @@ public class TurretController : MonoBehaviour
             ProjectileController projectile = bulletObj.GetComponent<ProjectileController>();
             if (projectile != null)
             {
+                // Pass damage from ScriptableObject data profile
                 projectile.SetTarget(currentTarget);
             }
         }
 
-        currentHeat += heatPerShot;
-        Debug.Log($"[CoreDefender] Turret fired! Current Heat: {currentHeat}/{maxHeat}");
+        currentHeat += turretData.heatPerShot;
+        Debug.Log($"[CoreDefender] {turretData.turretName} fired! Current Heat: {currentHeat}/{turretData.maxHeat}");
 
-        if (currentHeat >= maxHeat)
+        if (currentHeat >= turretData.maxHeat)
         {
             isOverheated = true;
-            Debug.LogWarning("[CoreDefender] TURRET OVERHEATED! Cooling required.");
+            Debug.LogWarning($"[CoreDefender] {turretData.turretName} OVERHEATED! Cooling required.");
         }
     }
 
@@ -109,14 +107,14 @@ public class TurretController : MonoBehaviour
     {
         if (currentHeat > 0f)
         {
-            currentHeat -= coolingRate * Time.deltaTime;
+            currentHeat -= turretData.coolingRate * Time.deltaTime;
             if (currentHeat <= 0f)
             {
                 currentHeat = 0f;
                 if (isOverheated)
                 {
                     isOverheated = false;
-                    Debug.Log("[CoreDefender] Turret cooled down. Operational again.");
+                    Debug.Log($"[CoreDefender] {turretData.turretName} cooled down. Operational again.");
                 }
             }
         }
@@ -124,12 +122,10 @@ public class TurretController : MonoBehaviour
 
     private void UpdateHeatUI()
     {
-        if (fillBarImage != null)
+        if (fillBarImage != null && turretData != null)
         {
-            // Update fill amount based on current heat percentage
-            fillBarImage.fillAmount = currentHeat / maxHeat;
+            fillBarImage.fillAmount = currentHeat / turretData.maxHeat;
 
-            // Change color to bright red/pink (#FF1A4D) if overheated, or cyan (#1AE6FF) when normal
             if (isOverheated)
             {
                 fillBarImage.color = new Color(1f, 0.1f, 0.302f, 1f); // #FF1A4D
@@ -143,7 +139,10 @@ public class TurretController : MonoBehaviour
 
     private void OnDrawGizmosSelected()
     {
-        Gizmos.color = new Color(1f, 0f, 0.3f, 0.4f);
-        Gizmos.DrawWireSphere(transform.position, attackRange);
+        if (turretData != null)
+        {
+            Gizmos.color = new Color(1f, 0f, 0.3f, 0.4f);
+            Gizmos.DrawWireSphere(transform.position, turretData.attackRange);
+        }
     }
 }
