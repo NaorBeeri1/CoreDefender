@@ -16,4 +16,9 @@ public class TurretData : ScriptableObject
     public float maxHeat = 100f;
     public float heatPerShot = 15f;
     public float coolingRate = 25f;   // Heat lost per second when idle
+
+    [Header("Upgrade Scaling")]
+    public int upgradeCost = 150;
+    public float fireRateMultiplier = 1.25f;
+    public int damageUpgradeBonus = 10;
 }

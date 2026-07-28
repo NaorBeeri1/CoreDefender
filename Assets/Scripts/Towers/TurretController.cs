@@ -1,32 +1,33 @@
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.InputSystem;
 
 public class TurretController : MonoBehaviour
 {
     [Header("Data Profile")]
-    [SerializeField] private TurretData turretData; // Drag StandardTurretData here
+    [SerializeField] private TurretData turretData;
 
     [Header("Combat References")]
     [SerializeField] private GameObject bulletPrefab;
 
     [Header("UI References")]
-    [SerializeField] private GameObject turretCanvasPrefab; 
-    private GameObject activeCanvasInstance;
+    [SerializeField] private GameObject turretCanvasPrefab; // Heat bar canvas
+    private GameObject activeHeatCanvas;
     private Image fillBarImage;
 
     private float currentHeat = 0f;
     private float fireCooldown = 0f;
     private bool isOverheated = false;
     private Transform currentTarget;
+    private bool isUpgraded = false;
 
     private void Start()
     {
-        // Instantiate the floating heat bar tightly above the turret head (offset Y = 0.65f)
+        // Instantiate the floating heat bar tightly above the turret head
         if (turretCanvasPrefab != null)
         {
-            activeCanvasInstance = Instantiate(turretCanvasPrefab, transform.position + new Vector3(0f, 0.65f, 0f), Quaternion.identity, transform);
-            
-            Transform fillTrans = activeCanvasInstance.transform.Find("BackgroundBar/FillBar");
+            activeHeatCanvas = Instantiate(turretCanvasPrefab, transform.position + new Vector3(0f, 0.65f, 0f), Quaternion.identity, transform);
+            Transform fillTrans = activeHeatCanvas.transform.Find("BackgroundBar/FillBar");
             if (fillTrans != null)
             {
                 fillBarImage = fillTrans.GetComponent<Image>();
@@ -38,18 +39,64 @@ public class TurretController : MonoBehaviour
     {
         if (turretData == null) return;
 
+        // Note: When game is paused (Time.timeScale == 0), Update stops executing. 
+        // We use unscaled time checks or allow mouse raycasts during pause for UI selection.
         HandleCooling();
         FindNearestEnemy();
 
-        fireCooldown -= Time.deltaTime;
+        fireCooldown -= Time.unscaledDeltaTime;
         
-        if (currentTarget != null && fireCooldown <= 0f && !isOverheated)
+        if (currentTarget != null && fireCooldown <= (1f / turretData.fireRate) && !isOverheated)
         {
-            Shoot();
-            fireCooldown = 1f / turretData.fireRate;
+            // Only shoot if game is active
+            if (Time.timeScale > 0f)
+            {
+                Shoot();
+                fireCooldown = 1f / turretData.fireRate;
+            }
         }
 
         UpdateHeatUI();
+        HandleSelectionInput();
+    }
+
+    private void HandleSelectionInput()
+    {
+        // Allow clicking even when paused (Time.timeScale == 0) by checking Input directly
+        bool isClicked = Mouse.current != null ? Mouse.current.leftButton.wasPressedThisFrame : Input.GetMouseButtonDown(0);
+
+        if (isClicked && Time.timeScale >= 0f)
+        {
+            Vector2 mouseScreenPos = Mouse.current != null ? Mouse.current.position.ReadValue() : Input.mousePosition;
+            Vector3 mouseWorldPos = Camera.main.ScreenToWorldPoint(mouseScreenPos);
+            mouseWorldPos.z = 0f;
+
+            float distance = Vector3.Distance(transform.position, mouseWorldPos);
+            if (distance <= 0.5f)
+            {
+                if (TurretUIManager.Instance != null)
+                {
+                    TurretUIManager.Instance.OpenMenu(this);
+                }
+            }
+        }
+    }
+
+    public bool IsUpgraded() => isUpgraded;
+    public int GetUpgradeCost() => turretData != null ? turretData.upgradeCost : 150;
+
+    public void ExecuteUpgrade()
+    {
+        if (isUpgraded || turretData == null) return;
+
+        if (PlayerStats.Instance != null && PlayerStats.Instance.SpendCredits(turretData.upgradeCost))
+        {
+            isUpgraded = true;
+            turretData.fireRate *= turretData.fireRateMultiplier;
+            turretData.damage += turretData.damageUpgradeBonus;
+
+            Debug.Log($"[CoreDefender] {turretData.turretName} upgraded! New Fire Rate: {turretData.fireRate}, New Damage: {turretData.damage}");
+        }
     }
 
     private void FindNearestEnemy()
@@ -82,7 +129,6 @@ public class TurretController : MonoBehaviour
     {
         if (currentTarget == null) return;
 
-        // Use Object Pooling instead of Instantiate()
         GameObject bulletObj = ObjectPooler.Instance.SpawnFromPool("Bullet", transform.position, Quaternion.identity);
         if (bulletObj != null)
         {
@@ -94,12 +140,11 @@ public class TurretController : MonoBehaviour
         }
 
         currentHeat += turretData.heatPerShot;
-        Debug.Log($"[CoreDefender] {turretData.turretName} fired! Current Heat: {currentHeat}/{turretData.maxHeat}");
 
         if (currentHeat >= turretData.maxHeat)
         {
             isOverheated = true;
-            Debug.LogWarning($"[CoreDefender] {turretData.turretName} OVERHEATED! Cooling required.");
+            Debug.LogWarning($"[CoreDefender] {turretData.turretName} OVERHEATED!");
         }
     }
 
@@ -107,14 +152,13 @@ public class TurretController : MonoBehaviour
     {
         if (currentHeat > 0f)
         {
-            currentHeat -= turretData.coolingRate * Time.deltaTime;
+            currentHeat -= turretData.coolingRate * Time.unscaledDeltaTime;
             if (currentHeat <= 0f)
             {
                 currentHeat = 0f;
                 if (isOverheated)
                 {
                     isOverheated = false;
-                    Debug.Log($"[CoreDefender] {turretData.turretName} cooled down. Operational again.");
                 }
             }
         }
