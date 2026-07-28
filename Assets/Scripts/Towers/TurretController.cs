@@ -25,10 +25,10 @@ public class TurretController : MonoBehaviour
 
     private void Start()
     {
-        // Instantiate the floating heat bar canvas above the turret
+        // Instantiate the floating heat bar tightly above the turret head (offset Y = 0.65f)
         if (turretCanvasPrefab != null)
         {
-            activeCanvasInstance = Instantiate(turretCanvasPrefab, transform.position + new Vector3(0f, 1.2f, 0f), Quaternion.identity, transform);
+            activeCanvasInstance = Instantiate(turretCanvasPrefab, transform.position + new Vector3(0f, 0.65f, 0f), Quaternion.identity, transform);
             
             // Find the FillBar image inside the instantiated canvas
             Transform fillTrans = activeCanvasInstance.transform.Find("BackgroundBar/FillBar");
