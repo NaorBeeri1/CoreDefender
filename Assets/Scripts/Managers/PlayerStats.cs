@@ -20,10 +20,27 @@ public class PlayerStats : MonoBehaviour
         }
     }
 
+    private void OnEnable()
+    {
+        // Subscribe to the Event Bus
+        GameEventBus.OnEnemyDestroyed += HandleEnemyDestroyed;
+    }
+
+    private void OnDisable()
+    {
+        // Unsubscribe to prevent memory leaks when objects are destroyed
+        GameEventBus.OnEnemyDestroyed -= HandleEnemyDestroyed;
+    }
+
     private void Start()
     {
         currentCredits = startingCredits;
         Debug.Log($"[CoreDefender] Player online. Starting Credits: {currentCredits}");
+    }
+
+    private void HandleEnemyDestroyed(int creditReward)
+    {
+        AddCredits(creditReward);
     }
 
     public int GetCurrentCredits()
@@ -34,7 +51,7 @@ public class PlayerStats : MonoBehaviour
     public void AddCredits(int amount)
     {
         currentCredits += amount;
-        Debug.Log($"[CoreDefender] Earned {amount} credits. Total: {currentCredits}");
+        Debug.Log($"[CoreDefender] Earned {amount} credits via Event Bus. Total: {currentCredits}");
     }
 
     public bool SpendCredits(int amount)

@@ -105,4 +105,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyController
   moveSpeed: 3
-  health: 50
+  maxHealth: 50
+  damageToCore: 10
+  creditReward: 25
+  enemyCanvasPrefab: {fileID: 8425446965409396724, guid: 2464024d4cb542d499236ce2a2f16c2b, type: 3}
