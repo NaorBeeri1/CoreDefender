@@ -17,15 +17,13 @@ public class ProjectileController : MonoBehaviour
     {
         if (target == null)
         {
-            Destroy(gameObject);
+            gameObject.SetActive(false); // Return to pool instead of destroying
             return;
         }
 
-        // Move towards the target enemy
         Vector3 direction = (target.position - transform.position).normalized;
         transform.position += direction * speed * Time.deltaTime;
 
-        // Check for impact
         if (Vector3.Distance(transform.position, target.position) < 0.2f)
         {
             HitTarget();
@@ -39,6 +37,6 @@ public class ProjectileController : MonoBehaviour
         {
             enemy.TakeDamage(damage);
         }
-        Destroy(gameObject);
+        gameObject.SetActive(false); // Return to pool instead of destroying
     }
 }

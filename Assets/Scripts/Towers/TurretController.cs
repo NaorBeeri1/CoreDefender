@@ -82,13 +82,13 @@ public class TurretController : MonoBehaviour
     {
         if (currentTarget == null) return;
 
-        if (bulletPrefab != null)
+        // Use Object Pooling instead of Instantiate()
+        GameObject bulletObj = ObjectPooler.Instance.SpawnFromPool("Bullet", transform.position, Quaternion.identity);
+        if (bulletObj != null)
         {
-            GameObject bulletObj = Instantiate(bulletPrefab, transform.position, Quaternion.identity);
             ProjectileController projectile = bulletObj.GetComponent<ProjectileController>();
             if (projectile != null)
             {
-                // Pass damage from ScriptableObject data profile
                 projectile.SetTarget(currentTarget);
             }
         }
