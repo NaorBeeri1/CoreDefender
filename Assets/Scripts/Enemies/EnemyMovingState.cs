@@ -15,6 +15,14 @@ public class EnemyMovingState : IEnemyState
         if (Vector3.Distance(enemy.transform.position, destination) < 0.1f)
         {
             enemy.DealDamageToCore();
+
+            // Notify WaveManager before destroying so the wave counter advances correctly
+            WaveManager waveManager = Object.FindObjectOfType<WaveManager>();
+            if (waveManager != null)
+            {
+                waveManager.NotifyEnemyDefeated();
+            }
+
             Object.Destroy(enemy.gameObject);
         }
     }

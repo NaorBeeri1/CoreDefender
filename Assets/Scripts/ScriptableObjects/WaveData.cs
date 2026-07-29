@@ -7,7 +7,10 @@ public class WaveData : ScriptableObject
     public string waveName = "Wave 1";
 
     [Header("Spawn Parameters")]
-    public GameObject enemyPrefab;    // Can be standard or specialized enemy
-    public int enemyCount = 10;       // Total enemies in this wave
-    public float spawnInterval = 1.5f; // Delay between each spawn
+    public GameObject enemyPrefab;    
+    public int enemyCount = 10;       
+    public float spawnInterval = 1.2f; 
+
+    [Header("Difficulty Scaling")]
+    public int healthBonusPerEnemy = 20; // Makes subsequent waves tougher!
 }

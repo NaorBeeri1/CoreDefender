@@ -4,7 +4,7 @@ using UnityEngine.UI;
 public class EnemyContext : MonoBehaviour
 {
     [Header("Enemy Stats")]
-    [SerializeField] private float moveSpeed = 3f;
+    [SerializeField] private float moveSpeed =4.5f;
     [SerializeField] private int maxHealth = 100;
     [SerializeField] private int damageToCore = 10;
     [SerializeField] private int creditReward = 25;
@@ -17,7 +17,6 @@ public class EnemyContext : MonoBehaviour
     private int currentHealth;
     private Transform targetCore;
     private CoreManager coreManager;
-    private float lastDamageTime = -1f;
 
     private IEnemyState currentState;
 
@@ -26,7 +25,6 @@ public class EnemyContext : MonoBehaviour
 
     private void Start()
     {
-        maxHealth = 100;
         currentHealth = maxHealth;
 
         if (enemyCanvasPrefab != null)
@@ -74,9 +72,7 @@ public class EnemyContext : MonoBehaviour
 
     public void TakeDamage(int damage)
     {
-        if (Time.time - lastDamageTime < 0.15f) return;
-        lastDamageTime = Time.time;
-
+        // Removed the 0.15s time-gate so multi-turret rapid fire damage registers every single hit accurately!
         currentHealth -= damage;
         if (currentHealth < 0) currentHealth = 0;
 
@@ -107,6 +103,13 @@ public class EnemyContext : MonoBehaviour
     private void Die()
     {
         GameEventBus.TriggerEnemyDestroyed(creditReward);
+
+        WaveManager waveManager = Object.FindObjectOfType<WaveManager>();
+        if (waveManager != null)
+        {
+            waveManager.NotifyEnemyDefeated();
+        }
+
         Destroy(gameObject);
     }
 }

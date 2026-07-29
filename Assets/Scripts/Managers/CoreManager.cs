@@ -39,6 +39,13 @@ public class CoreManager : MonoBehaviour
     private void TriggerGameOver()
     {
         Debug.LogError("[CoreDefender] GAME OVER! The Core has been destroyed.");
+        
+        // Check and save high score records
+        if (ScoreManager.Instance != null)
+        {
+            ScoreManager.Instance.CheckAndSaveHighScore();
+        }
+
         if (uiManager != null)
         {
             uiManager.ShowGameOver();

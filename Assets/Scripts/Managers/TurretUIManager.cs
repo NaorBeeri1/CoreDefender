@@ -12,6 +12,7 @@ public class TurretUIManager : MonoBehaviour
     [SerializeField] private Button upgradeButton;
     [SerializeField] private TextMeshProUGUI upgradeButtonText;
     [SerializeField] private Button sellButton;
+    [SerializeField] private TextMeshProUGUI sellButtonText; // Make sure to assign this or find it dynamically
     [SerializeField] private Button closeButton;
 
     private TurretController selectedTurret;
@@ -43,6 +44,11 @@ public class TurretUIManager : MonoBehaviour
         if (sellButton != null)
         {
             sellButton.onClick.AddListener(OnSellClicked);
+            // Automatically grab the TextMeshProUGUI on the sell button if not manually assigned
+            if (sellButtonText == null)
+            {
+                sellButtonText = sellButton.GetComponentInChildren<TextMeshProUGUI>();
+            }
         }
 
         if (closeButton != null)
@@ -69,6 +75,16 @@ public class TurretUIManager : MonoBehaviour
 
         TurretData data = selectedTurret.GetTurretData();
         if (data == null) return;
+
+        // Calculate dynamic refund amount matching TurretController
+        int baseRefund = 75;
+        int upgradeRefundBonus = 50;
+        int totalRefund = baseRefund + (data.currentUpgradeLevel * upgradeRefundBonus);
+
+        if (sellButtonText != null)
+        {
+            sellButtonText.text = $"SELL (Refund {totalRefund}c)";
+        }
 
         if (data.currentUpgradeLevel >= data.maxUpgradeLevel)
         {
@@ -115,7 +131,7 @@ public class TurretUIManager : MonoBehaviour
         if (selectedTurret != null)
         {
             selectedTurret.ExecuteUpgrade();
-            UpdateMenuDisplay(); // Instantly updates UI tier and stats text!
+            UpdateMenuDisplay(); // Instantly updates UI tier, stats text, and dynamic sell refund!
         }
     }
 

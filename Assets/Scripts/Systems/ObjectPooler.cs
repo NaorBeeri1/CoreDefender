@@ -54,14 +54,42 @@ public class ObjectPooler : MonoBehaviour
             return null;
         }
 
-        GameObject objectToSpawn = poolDictionary[tag].Dequeue();
+        Queue<GameObject> objectQueue = poolDictionary[tag];
 
-        objectToSpawn.SetActive(true);
-        objectToSpawn.transform.position = position;
-        objectToSpawn.transform.rotation = rotation;
+        // Ensure we don't pull a destroyed object from the queue
+        GameObject objectToSpawn = null;
+        while (objectQueue.Count > 0)
+        {
+            GameObject candidate = objectQueue.Dequeue();
+            if (candidate != null)
+            {
+                objectToSpawn = candidate;
+                break;
+            }
+        }
 
-        // Re-enqueue the object back into the queue for future reuse
-        poolDictionary[tag].Enqueue(objectToSpawn);
+        // If the pool ran out of valid objects, instantiate a new one dynamically
+        if (objectToSpawn == null)
+        {
+            foreach (Pool pool in pools)
+            {
+                if (pool.tag == tag)
+                {
+                    objectToSpawn = Instantiate(pool.prefab);
+                    break;
+                }
+            }
+        }
+
+        if (objectToSpawn != null)
+        {
+            objectToSpawn.SetActive(true);
+            objectToSpawn.transform.position = position;
+            objectToSpawn.transform.rotation = rotation;
+
+            // Enqueue it back for future reuse
+            objectQueue.Enqueue(objectToSpawn);
+        }
 
         return objectToSpawn;
     }

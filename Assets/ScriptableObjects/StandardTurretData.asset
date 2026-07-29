@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: StandardTurretData
   m_EditorClassIdentifier: Assembly-CSharp::TurretData
   turretName: Standard Turret
-  cost: 100
+  cost: 125
   fireRate: 1
   attackRange: 5
   damage: 50

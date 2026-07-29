@@ -53,7 +53,6 @@ public class BuildManager : MonoBehaviour
         Vector3 mouseWorldPos = mainCam.ScreenToWorldPoint(mouseScreenPos);
         mouseWorldPos.z = 0f;
 
-        // Calculate bounds centered around Vector3.zero (or GridManager position)
         float halfWidth = gridWidth / 2f;
         float halfHeight = gridHeight / 2f;
 
@@ -108,9 +107,17 @@ public class BuildManager : MonoBehaviour
                         float spawnY = currentGridPos.y - halfHeight + 0.5f;
                         Vector3 spawnPos = new Vector3(spawnX, spawnY, 0f);
 
+                        foreach (GameObject t in existingTurrets)
+                        {
+                            if (t != null && Vector3.Distance(t.transform.position, spawnPos) < 0.2f)
+                            {
+                                PlayerStats.Instance.AddCredits(turretCost); // Refund
+                                return;
+                            }
+                        }
+
                         GameObject newTurret = Instantiate(turretPrefab, spawnPos, Quaternion.identity);
                         newTurret.tag = "Turret";
-                        Debug.Log($"Core Defender - Placed turret at grid: X = {currentGridPos.x}, Y = {currentGridPos.y}");
                     }
                 }
             }
