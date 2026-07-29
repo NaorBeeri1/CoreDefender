@@ -81,46 +81,41 @@ public class BuildManager : MonoBehaviour
 
         if (isClicked)
         {
-            Vector2 mouseScreenPos = Mouse.current != null ? Mouse.current.position.ReadValue() : Input.mousePosition;
-            Vector3 mouseWorldPos = mainCam.ScreenToWorldPoint(mouseScreenPos);
-            mouseWorldPos.z = 0f;
-
-            GameObject[] existingTurrets = GameObject.FindGameObjectsWithTag("Turret");
-            foreach (GameObject t in existingTurrets)
+            if (ShopManager.Instance == null || !ShopManager.Instance.IsBuyingMode())
             {
-                if (Vector3.Distance(t.transform.position, mouseWorldPos) <= 0.5f)
-                {
-                    return; // Clicked an existing turret, cancel build mode
-                }
+                return;
             }
 
             float halfWidth = gridWidth / 2f;
             float halfHeight = gridHeight / 2f;
 
-            if (currentGridPos.x >= 0 && currentGridPos.x < gridWidth && currentGridPos.y >= 0 && currentGridPos.y < gridHeight)
+            if (currentGridPos.x < 0 || currentGridPos.x >= gridWidth || currentGridPos.y < 0 || currentGridPos.y >= gridHeight)
             {
-                if (turretPrefab != null)
+                return; 
+            }
+
+            Vector2 mouseScreenPos = Mouse.current != null ? Mouse.current.position.ReadValue() : Input.mousePosition;
+            Vector3 mouseWorldPos = mainCam.ScreenToWorldPoint(mouseScreenPos);
+            mouseWorldPos.z = 0f;
+
+            float spawnX = currentGridPos.x - halfWidth + 0.5f;
+            float spawnY = currentGridPos.y - halfHeight + 0.5f;
+            Vector3 spawnPos = new Vector3(spawnX, spawnY, 0f);
+
+            GameObject[] existingTurrets = GameObject.FindGameObjectsWithTag("Turret");
+            foreach (GameObject t in existingTurrets)
+            {
+                if (t != null && Vector3.Distance(t.transform.position, spawnPos) <= 0.2f)
                 {
-                    if (PlayerStats.Instance != null && PlayerStats.Instance.SpendCredits(turretCost))
-                    {
-                        float spawnX = currentGridPos.x - halfWidth + 0.5f;
-                        float spawnY = currentGridPos.y - halfHeight + 0.5f;
-                        Vector3 spawnPos = new Vector3(spawnX, spawnY, 0f);
-
-                        foreach (GameObject t in existingTurrets)
-                        {
-                            if (t != null && Vector3.Distance(t.transform.position, spawnPos) < 0.2f)
-                            {
-                                PlayerStats.Instance.AddCredits(turretCost); // Refund
-                                return;
-                            }
-                        }
-
-                        GameObject newTurret = Instantiate(turretPrefab, spawnPos, Quaternion.identity);
-                        newTurret.tag = "Turret";
-                    }
+                    return; // Spot already occupied
                 }
             }
+
+            // Deduct credits and keep building mode active!
+            ShopManager.Instance.ConsumePurchase(100);
+
+            GameObject newTurret = Instantiate(turretPrefab, spawnPos, Quaternion.identity);
+            newTurret.tag = "Turret";
         }
     }
 }
