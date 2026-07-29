@@ -12,8 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4dd41856e40c578458e546120c13b4fb, type: 3}
   m_Name: Perk_Overclock
   m_EditorClassIdentifier: Assembly-CSharp::CorePerkData
-  perkName: Overcharged Capacitors
-  perkDescription: Increases all turret fire rates by 25%.
+  perkName: Overclocked Subroutines
+  perkDescription: Boosts active turret fire rates by 25% and expands Core structural
+    integrity by +25 HP.
   fireRateBonusMultiplier: 1.25
   creditBonusMultiplier: 1.2
   coreHealthBonus: 25

@@ -53,8 +53,12 @@ public class BuildManager : MonoBehaviour
         Vector3 mouseWorldPos = mainCam.ScreenToWorldPoint(mouseScreenPos);
         mouseWorldPos.z = 0f;
 
-        int snappedX = Mathf.FloorToInt(mouseWorldPos.x);
-        int snappedY = Mathf.FloorToInt(mouseWorldPos.y);
+        // Calculate bounds centered around Vector3.zero (or GridManager position)
+        float halfWidth = gridWidth / 2f;
+        float halfHeight = gridHeight / 2f;
+
+        int snappedX = Mathf.FloorToInt(mouseWorldPos.x + halfWidth);
+        int snappedY = Mathf.FloorToInt(mouseWorldPos.y + halfHeight);
 
         currentGridPos = new Vector2Int(snappedX, snappedY);
 
@@ -65,7 +69,9 @@ public class BuildManager : MonoBehaviour
             activeIndicator.SetActive(isWithinBounds);
             if (isWithinBounds)
             {
-                activeIndicator.transform.position = new Vector3(snappedX + 0.5f, snappedY + 0.5f, 0f);
+                float worldX = snappedX - halfWidth + 0.5f;
+                float worldY = snappedY - halfHeight + 0.5f;
+                activeIndicator.transform.position = new Vector3(worldX, worldY, 0f);
             }
         }
     }
@@ -76,19 +82,21 @@ public class BuildManager : MonoBehaviour
 
         if (isClicked)
         {
-            // Do not build if the player clicked directly on an existing turret to inspect/upgrade it
             Vector2 mouseScreenPos = Mouse.current != null ? Mouse.current.position.ReadValue() : Input.mousePosition;
             Vector3 mouseWorldPos = mainCam.ScreenToWorldPoint(mouseScreenPos);
             mouseWorldPos.z = 0f;
 
-            GameObject[] existingTurrets = GameObject.FindGameObjectsWithTag("Turret"); // Let's tag our turrets!
+            GameObject[] existingTurrets = GameObject.FindGameObjectsWithTag("Turret");
             foreach (GameObject t in existingTurrets)
             {
                 if (Vector3.Distance(t.transform.position, mouseWorldPos) <= 0.5f)
                 {
-                    return; // Clicked an existing turret, cancel build mode for this frame
+                    return; // Clicked an existing turret, cancel build mode
                 }
             }
+
+            float halfWidth = gridWidth / 2f;
+            float halfHeight = gridHeight / 2f;
 
             if (currentGridPos.x >= 0 && currentGridPos.x < gridWidth && currentGridPos.y >= 0 && currentGridPos.y < gridHeight)
             {
@@ -96,10 +104,13 @@ public class BuildManager : MonoBehaviour
                 {
                     if (PlayerStats.Instance != null && PlayerStats.Instance.SpendCredits(turretCost))
                     {
-                        Vector3 spawnPos = new Vector3(currentGridPos.x + 0.5f, currentGridPos.y + 0.5f, 0f);
+                        float spawnX = currentGridPos.x - halfWidth + 0.5f;
+                        float spawnY = currentGridPos.y - halfHeight + 0.5f;
+                        Vector3 spawnPos = new Vector3(spawnX, spawnY, 0f);
+
                         GameObject newTurret = Instantiate(turretPrefab, spawnPos, Quaternion.identity);
-                        newTurret.tag = "Turret"; // Tag it so we can check against it
-                        Debug.Log($"Core Defender - Placed turret at: X = {currentGridPos.x}, Y = {currentGridPos.y}");
+                        newTurret.tag = "Turret";
+                        Debug.Log($"Core Defender - Placed turret at grid: X = {currentGridPos.x}, Y = {currentGridPos.y}");
                     }
                 }
             }

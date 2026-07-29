@@ -5,7 +5,9 @@ public class WaveManager : MonoBehaviour
 {
     [Header("Wave Configuration")]
     [SerializeField] private WaveData currentWave; // Drag Wave1Data here
-    [SerializeField] private Vector3 spawnPosition = new Vector3(15f, 4.5f, 0f);
+    [SerializeField] private float spawnXPosition = 9f; // Just off the right edge of the screen
+    [SerializeField] private float minY = -4f;         // Bottom boundary of the screen
+    [SerializeField] private float maxY = 4f;          // Top boundary of the screen
 
     private bool isSpawning = false;
 
@@ -43,8 +45,12 @@ public class WaveManager : MonoBehaviour
     {
         if (currentWave.enemyPrefab != null)
         {
+            // Pick a random Y height between minY and maxY on the right side of the screen
+            float randomY = Random.Range(minY, maxY);
+            Vector3 spawnPosition = new Vector3(spawnXPosition, randomY, 0f);
+
             Instantiate(currentWave.enemyPrefab, spawnPosition, Quaternion.identity);
-            Debug.Log("[CoreDefender] Spawned wave enemy unit.");
+            Debug.Log($"[CoreDefender] Spawned wave enemy unit at Y: {randomY:F2}");
         }
     }
 }

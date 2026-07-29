@@ -37,10 +37,23 @@ public class ProjectileController : MonoBehaviour
 
     private void HitTarget()
     {
-        EnemyController enemy = target.GetComponent<EnemyController>();
-        if (enemy != null)
+        if (target != null)
         {
-            enemy.TakeDamage(damage);
+            // Check for EnemyContext (State Pattern Architecture)
+            EnemyContext enemyContext = target.GetComponent<EnemyContext>();
+            if (enemyContext != null)
+            {
+                enemyContext.TakeDamage(damage);
+            }
+            else
+            {
+                // Fallback check if old EnemyController is still present
+                EnemyController oldController = target.GetComponent<EnemyController>();
+                if (oldController != null)
+                {
+                    oldController.TakeDamage(damage);
+                }
+            }
         }
         gameObject.SetActive(false);
     }
