@@ -25,12 +25,11 @@ public class TurretController : MonoBehaviour
     {
         if (originalTurretData != null)
         {
-            // INSTANTIATE A UNIQUE RUNTIME COPY SO UPGRADES DON'T SHARE ACROSS TURRETS
+            // Instantiate a unique runtime copy so upgrades don't share across turrets
             turretData = Instantiate(originalTurretData);
             turretData.currentUpgradeLevel = 0;
             turretData.damage = 50; 
             turretData.fireRate = 1f;
-            Debug.Log($"[CoreDefender] Unique {turretData.turretName} instantiated with Damage: {turretData.damage}");
         }
 
         if (turretCanvasPrefab != null)
@@ -96,12 +95,22 @@ public class TurretController : MonoBehaviour
         if (PlayerStats.Instance != null && PlayerStats.Instance.SpendCredits(turretData.upgradeCost))
         {
             turretData.currentUpgradeLevel++;
-            turretData.damage += turretData.damageUpgradeBonus; // Tier 1: 75, Tier 2: 100
+            turretData.damage += turretData.damageUpgradeBonus; // Tier 1: 75, Tier 2: 100, Tier 3: 125
             turretData.fireRate *= turretData.fireRateMultiplier;
             turretData.coolingRate *= turretData.coolingRateMultiplier;
 
             Debug.Log($"[CoreDefender] Upgraded unique turret to Tier {turretData.currentUpgradeLevel}! Damage: {turretData.damage}");
         }
+    }
+
+    public void SellTurret()
+    {
+        int refundAmount = 75; 
+        if (PlayerStats.Instance != null)
+        {
+            PlayerStats.Instance.AddCredits(refundAmount);
+        }
+        Destroy(gameObject);
     }
 
     private void FindNearestEnemy()
@@ -146,7 +155,6 @@ public class TurretController : MonoBehaviour
         }
 
         currentHeat += turretData.heatPerShot;
-
         if (currentHeat >= turretData.maxHeat)
         {
             isOverheated = true;
@@ -161,10 +169,7 @@ public class TurretController : MonoBehaviour
             if (currentHeat <= 0f)
             {
                 currentHeat = 0f;
-                if (isOverheated)
-                {
-                    isOverheated = false;
-                }
+                if (isOverheated) isOverheated = false;
             }
         }
     }
@@ -174,15 +179,7 @@ public class TurretController : MonoBehaviour
         if (fillBarImage != null && turretData != null)
         {
             fillBarImage.fillAmount = currentHeat / turretData.maxHeat;
-
-            if (isOverheated)
-            {
-                fillBarImage.color = new Color(1f, 0.1f, 0.302f, 1f); // #FF1A4D
-            }
-            else
-            {
-                fillBarImage.color = new Color(0.102f, 0.902f, 1f, 1f); // #1AE6FF
-            }
+            fillBarImage.color = isOverheated ? new Color(1f, 0.1f, 0.302f, 1f) : new Color(0.102f, 0.902f, 1f, 1f);
         }
     }
 
@@ -193,19 +190,5 @@ public class TurretController : MonoBehaviour
             Gizmos.color = new Color(1f, 0f, 0.3f, 0.4f);
             Gizmos.DrawWireSphere(transform.position, turretData.attackRange);
         }
-    }
-    public void SellTurret()
-    {
-        // Calculate refund (e.g., base cost 100 + upgrades spent, refunding 75% or flat rate)
-        int refundAmount = 75; 
-
-        if (PlayerStats.Instance != null)
-        {
-            PlayerStats.Instance.AddCredits(refundAmount);
-            Debug.Log($"[CoreDefender] Turret sold for {refundAmount} credits.");
-        }
-
-        // Cleanly destroy this turret game object from the grid
-        Destroy(gameObject);
     }
 }

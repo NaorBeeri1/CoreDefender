@@ -59,9 +59,7 @@ public class TurretUIManager : MonoBehaviour
             upgradePanel.SetActive(true);
         }
 
-        // Pause gameplay
         Time.timeScale = 0f;
-
         UpdateMenuDisplay();
     }
 
@@ -109,7 +107,6 @@ public class TurretUIManager : MonoBehaviour
             upgradePanel.SetActive(false);
         }
 
-        // Resume normal game speed
         Time.timeScale = 1f;
     }
 
@@ -118,7 +115,7 @@ public class TurretUIManager : MonoBehaviour
         if (selectedTurret != null)
         {
             selectedTurret.ExecuteUpgrade();
-            UpdateMenuDisplay();
+            UpdateMenuDisplay(); // Instantly updates UI tier and stats text!
         }
     }
 
