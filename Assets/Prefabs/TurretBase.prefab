@@ -80,17 +80,17 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 10
+  m_SortingOrder: 0
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 4647338377630358598, guid: 5ef8eca15ddf1384bb643e8d5c29c562, type: 3}
-  m_Color: {r: 1, g: 0.827451, b: 0, a: 0.39215687}
+  m_Sprite: {fileID: 7851470227991654557, guid: 57672af3ce660014aaef8593b48bf032, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 9.11, y: 7.26}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 0
+  m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
 --- !u!114 &492851781696976095
 MonoBehaviour:
@@ -104,7 +104,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 01b58cdf75286234ab428f4b1d96ff93, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TurretController
-  originalTurretData: {fileID: 11400000, guid: 27ce4fe7511d2a04fb37fbcbadf47b5d, type: 2}
+  turretDataAsset: {fileID: 0}
   bulletPrefab: {fileID: 6367061635586260010, guid: ccfc1bda9fbde964ba39659b1ea8876e, type: 3}
   spriteRenderer: {fileID: 0}
   turretCanvasPrefab: {fileID: 2470467838436904971, guid: 536a99ea2cd1e2a479e0a433f52a9708, type: 3}
