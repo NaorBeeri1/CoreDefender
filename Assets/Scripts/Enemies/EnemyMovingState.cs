@@ -16,8 +16,7 @@ public class EnemyMovingState : IEnemyState
         {
             enemy.DealDamageToCore();
 
-            // Notify WaveManager before destroying so the wave counter advances correctly
-            WaveManager waveManager = Object.FindObjectOfType<WaveManager>();
+            WaveManager waveManager = Object.FindAnyObjectByType<WaveManager>();
             if (waveManager != null)
             {
                 waveManager.NotifyEnemyDefeated();

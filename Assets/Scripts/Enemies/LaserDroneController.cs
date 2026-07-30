@@ -7,8 +7,7 @@ public class LaserDroneController : MonoBehaviour
     [SerializeField] private float moveSpeed = 3f;
     [SerializeField] private int maxHealth = 150; 
     [SerializeField] private int damageToCore = 10;
-    [SerializeField] private float attackRange = 8f;
-    [SerializeField] private float fireRate = 0.5f; // Slower fire rate (once every 2 seconds)
+    [SerializeField] private float fireRate = 0.5f; 
     [SerializeField] private GameObject enemyBulletPrefab;
     [SerializeField] private int creditReward = 50;
 
@@ -27,7 +26,6 @@ public class LaserDroneController : MonoBehaviour
     private Transform coreTarget;
     private CoreManager coreManager;
     private float startYPos;
-    bool turretsCleared = false;
 
     private void Start()
     {
@@ -35,7 +33,6 @@ public class LaserDroneController : MonoBehaviour
         startYPos = transform.position.y;
         gameObject.tag = "Enemy";
 
-        // Spawn health bar above drone
         if (enemyCanvasPrefab != null)
         {
             activeCanvasInstance = Instantiate(enemyCanvasPrefab, transform.position + new Vector3(0f, 0.65f, 0f), Quaternion.identity, transform);
@@ -62,9 +59,6 @@ public class LaserDroneController : MonoBehaviour
 
         if (turrets.Length > 0)
         {
-            turretsCleared = false;
-
-            // Hover up and down on the right side of the screen
             float targetY = startYPos + Mathf.Sin(Time.time * floatFrequency) * floatAmplitude;
             transform.position = Vector3.MoveTowards(transform.position, new Vector3(rightSideX, targetY, 0f), moveSpeed * Time.deltaTime);
 
@@ -82,7 +76,6 @@ public class LaserDroneController : MonoBehaviour
         }
         else
         {
-            turretsCleared = true;
             if (coreTarget != null)
             {
                 Vector3 destination = coreTarget.position;
@@ -114,7 +107,7 @@ public class LaserDroneController : MonoBehaviour
             if (proj != null)
             {
                 proj.SetTarget(target);
-                proj.SetDamage(15); // Balanced turret damage (takes ~7 hits to destroy a 100 HP turret)
+                proj.SetDamage(15); 
             }
         }
     }
@@ -144,7 +137,7 @@ public class LaserDroneController : MonoBehaviour
     {
         GameEventBus.TriggerEnemyDestroyed(creditReward);
 
-        WaveManager waveManager = Object.FindObjectOfType<WaveManager>();
+        WaveManager waveManager = Object.FindAnyObjectByType<WaveManager>();
         if (waveManager != null)
         {
             waveManager.NotifyEnemyDefeated();

@@ -6,11 +6,10 @@ public class TargetingManager : MonoBehaviour
     public static TargetingManager Instance { get; private set; }
 
     [Header("Dispatch Settings")]
-    [SerializeField] private float updateInterval = 0.15f;
+    [SerializeField] private float updateInterval = 0.5f;
     private float updateTimer = 0f;
 
     private Dictionary<TurretController, Transform> turretAssignments = new Dictionary<TurretController, Transform>();
-    private Dictionary<Transform, int> enemyAssignedBulletCounts = new Dictionary<Transform, int>();
 
     private void Awake()
     {
@@ -23,111 +22,91 @@ public class TargetingManager : MonoBehaviour
         updateTimer -= Time.deltaTime;
         if (updateTimer <= 0f)
         {
-            UpdateAssignments();
+            CleanAssignments();
             updateTimer = updateInterval;
         }
     }
 
-    public Transform GetAssignedTarget(TurretController turret)
+    public Transform GetAssignedTarget(TurretController turret, float attackRange)
     {
-        if (turretAssignments.TryGetValue(turret, out Transform target))
+        if (turretAssignments.TryGetValue(turret, out Transform currentTarget) && currentTarget != null)
         {
-            return target;
-        }
-        return null;
-    }
-
-    public void RegisterBulletFired(Transform target)
-    {
-        if (target != null)
-        {
-            if (!enemyAssignedBulletCounts.ContainsKey(target))
-                enemyAssignedBulletCounts[target] = 0;
-            
-            enemyAssignedBulletCounts[target]++;
-        }
-    }
-
-    private void UpdateAssignments()
-    {
-        CleanCollections();
-
-        GameObject[] enemyObjs = GameObject.FindGameObjectsWithTag("Enemy");
-        GameObject[] turretObjs = GameObject.FindGameObjectsWithTag("Turret");
-
-        if (enemyObjs.Length == 0 || turretObjs.Length == 0)
-        {
-            turretAssignments.Clear();
-            return;
-        }
-
-        // Shuffle turrets randomly
-        List<TurretController> availableTurrets = new List<TurretController>();
-        foreach (GameObject tObj in turretObjs)
-        {
-            TurretController tc = tObj.GetComponent<TurretController>();
-            if (tc != null) availableTurrets.Add(tc);
-        }
-
-        for (int i = 0; i < availableTurrets.Count; i++)
-        {
-            TurretController temp = availableTurrets[i];
-            int randomIndex = Random.Range(i, availableTurrets.Count);
-            availableTurrets[i] = availableTurrets[randomIndex];
-            availableTurrets[randomIndex] = temp;
-        }
-
-        // Sort enemies by X position (closest to core first)
-        List<Transform> activeEnemies = new List<Transform>();
-        foreach (GameObject eObj in enemyObjs)
-        {
-            if (eObj != null) activeEnemies.Add(eObj.transform);
-        }
-        activeEnemies.Sort((a, b) => a.position.x.CompareTo(b.position.x));
-
-        turretAssignments.Clear();
-
-        // Assign turrets to enemies globally without any range restrictions
-        foreach (TurretController turret in availableTurrets)
-        {
-            Transform bestTarget = null;
-
-            foreach (Transform enemy in activeEnemies)
+            float dist = Vector3.Distance(turret.transform.position, currentTarget.position);
+            if (dist <= attackRange)
             {
-                int currentAssignedBullets = enemyAssignedBulletCounts.ContainsKey(enemy) ? enemyAssignedBulletCounts[enemy] : 0;
-                int maxAllowedBullets = GetRequiredBulletQuota(enemy);
+                return currentTarget;
+            }
+        }
 
-                if (currentAssignedBullets < maxAllowedBullets)
+        Transform newTarget = CalculateSmartTarget(turret.transform, attackRange);
+        turretAssignments[turret] = newTarget;
+        return newTarget;
+    }
+
+    private Transform CalculateSmartTarget(Transform turretTransform, float attackRange)
+    {
+        GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
+        if (enemies.Length == 0) return null;
+
+        Dictionary<Transform, int> targetCounts = new Dictionary<Transform, int>();
+        foreach (var kvp in turretAssignments)
+        {
+            if (kvp.Value != null)
+            {
+                if (!targetCounts.ContainsKey(kvp.Value)) targetCounts[kvp.Value] = 0;
+                targetCounts[kvp.Value]++;
+            }
+        }
+
+        Transform bestEnemy = null;
+        float bestScore = float.MinValue;
+
+        foreach (GameObject enemyObj in enemies)
+        {
+            if (enemyObj == null) continue;
+            Transform enemy = enemyObj.transform;
+
+            float dist = Vector3.Distance(turretTransform.position, enemy.position);
+            if (dist > attackRange) continue; 
+
+            float coreProximityScore = -enemy.position.x; 
+            int currentAssignedTurrets = targetCounts.ContainsKey(enemy) ? targetCounts[enemy] : 0;
+            
+            float totalScore = coreProximityScore - (currentAssignedTurrets * 5f);
+
+            if (totalScore > bestScore)
+            {
+                bestScore = totalScore;
+                bestEnemy = enemy;
+            }
+        }
+
+        if (bestEnemy == null)
+        {
+            float shortestDist = float.MaxValue;
+            foreach (GameObject enemyObj in enemies)
+            {
+                if (enemyObj == null) continue;
+                float dist = Vector3.Distance(turretTransform.position, enemyObj.transform.position);
+                if (dist < shortestDist)
                 {
-                    bestTarget = enemy;
-                    enemyAssignedBulletCounts[enemy] = currentAssignedBullets + 1;
-                    break;
+                    shortestDist = dist;
+                    bestEnemy = enemyObj.transform;
                 }
             }
-
-            if (bestTarget != null)
-            {
-                turretAssignments[turret] = bestTarget;
-            }
         }
+
+        return bestEnemy;
     }
 
-    private int GetRequiredBulletQuota(Transform enemyTransform)
+    private void CleanAssignments()
     {
-        LaserDroneController drone = enemyTransform.GetComponent<LaserDroneController>();
-        if (drone != null) return 3; // 150 HP drone needs 3 bullets
-
-        return 2; // Standard enemy needs 2 bullets
-    }
-
-    private void CleanCollections()
-    {
-        List<Transform> targetKeys = new List<Transform>(enemyAssignedBulletCounts.Keys);
-        foreach (var target in targetKeys)
+        List<TurretController> keys = new List<TurretController>(turretAssignments.Keys);
+        foreach (var turret in keys)
         {
-            if (target == null)
+            if (turret == null || turretAssignments[turret] == null)
             {
-                enemyAssignedBulletCounts.Remove(target);
+                turretAssignments.Remove(turret);
             }
         }
     }

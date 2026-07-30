@@ -30,11 +30,9 @@ public class CorePerkManager : MonoBehaviour
 
         Debug.Log($"[CoreDefender] Applying Core Perk: {activePerk.perkName}");
 
-        // Boost Core Health if CoreManager exists
-        CoreManager core = Object.FindObjectOfType<CoreManager>();
+        CoreManager core = Object.FindAnyObjectByType<CoreManager>();
         if (core != null)
         {
-            // We can add health bonus dynamically
             Debug.Log($"[CoreDefender] Core upgraded with +{activePerk.coreHealthBonus} integrity!");
         }
     }
