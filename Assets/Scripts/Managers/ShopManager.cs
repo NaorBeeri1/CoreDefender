@@ -8,14 +8,18 @@ public class ShopManager : MonoBehaviour
 
     [Header("Shop Configuration")]
     [SerializeField] private GameObject turretPrefab; 
+    [SerializeField] private GameObject bombPrefab;
     [SerializeField] private int baseTurretCost = 100;
+    [SerializeField] private int bombCost = 50;
 
     [Header("UI References")]
     [SerializeField] private Button turretButton1; 
+    [SerializeField] private Button bombButton; 
     [SerializeField] private TextMeshProUGUI currentBuyingText; 
 
     private bool isBuyingMode = false;
-    private string selectedTurretName = "None";
+    private string selectedItemName = "None";
+    private GameObject activeItemPrefab;
 
     private void Awake()
     {
@@ -27,27 +31,33 @@ public class ShopManager : MonoBehaviour
     {
         if (turretButton1 != null)
         {
-            turretButton1.onClick.AddListener(() => SelectTurretToBuy("Base Turret", baseTurretCost));
+            turretButton1.onClick.AddListener(() => SelectItemToBuy("Base Turret", baseTurretCost, turretPrefab));
+        }
+
+        if (bombButton != null)
+        {
+            bombButton.onClick.AddListener(() => SelectItemToBuy("Tactical Bomb", bombCost, bombPrefab));
         }
         UpdateBuyingText();
     }
 
     private void Update()
     {
-        // Auto-cancel buying mode if player runs out of money while placing
-        if (isBuyingMode && PlayerStats.Instance != null && PlayerStats.Instance.GetCurrentCredits() < baseTurretCost)
+        int currentCost = (selectedItemName == "Tactical Bomb") ? bombCost : baseTurretCost;
+        if (isBuyingMode && PlayerStats.Instance != null && PlayerStats.Instance.GetCurrentCredits() < currentCost)
         {
             CancelPurchase();
         }
     }
 
-    public void SelectTurretToBuy(string turretName, int cost)
+    public void SelectItemToBuy(string itemName, int cost, GameObject itemPrefab)
     {
         if (PlayerStats.Instance != null && PlayerStats.Instance.GetCurrentCredits() >= cost)
         {
             isBuyingMode = true;
-            selectedTurretName = turretName;
-            Debug.Log($"[ShopManager] Continuous buying mode active for: {selectedTurretName}");
+            selectedItemName = itemName;
+            activeItemPrefab = itemPrefab;
+            Debug.Log($"[ShopManager] Continuous buying mode active for: {selectedItemName}");
         }
         else
         {
@@ -55,6 +65,16 @@ public class ShopManager : MonoBehaviour
             CancelPurchase();
         }
         UpdateBuyingText();
+    }
+
+    public GameObject GetActiveItemPrefab()
+    {
+        return activeItemPrefab;
+    }
+
+    public int GetActiveItemCost()
+    {
+        return (selectedItemName == "Tactical Bomb") ? bombCost : baseTurretCost;
     }
 
     public bool IsBuyingMode()
@@ -68,11 +88,9 @@ public class ShopManager : MonoBehaviour
         {
             PlayerStats.Instance.SpendCredits(cost);
         }
-        
-        // DO NOT set isBuyingMode to false here! 
-        // This keeps continuous building active until money runs out or player cancels.
-        
-        if (PlayerStats.Instance != null && PlayerStats.Instance.GetCurrentCredits() < baseTurretCost)
+
+        int currentCost = (selectedItemName == "Tactical Bomb") ? bombCost : baseTurretCost;
+        if (PlayerStats.Instance != null && PlayerStats.Instance.GetCurrentCredits() < currentCost)
         {
             CancelPurchase();
         }
@@ -81,7 +99,8 @@ public class ShopManager : MonoBehaviour
     public void CancelPurchase()
     {
         isBuyingMode = false;
-        selectedTurretName = "None";
+        selectedItemName = "None";
+        activeItemPrefab = null;
         UpdateBuyingText();
     }
 
@@ -91,7 +110,7 @@ public class ShopManager : MonoBehaviour
         {
             if (isBuyingMode)
             {
-                currentBuyingText.text = $"Currently Buying: <color=#1AE6FF>{selectedTurretName}</color>";
+                currentBuyingText.text = $"Currently Buying: <color=#1AE6FF>{selectedItemName}</color>";
             }
             else
             {

@@ -1489,7 +1489,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Locked\n---
+  m_text: Bomb\n50c
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -2013,10 +2013,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::BuildManager
   gridManager: {fileID: 1456786352}
   buildIndicatorPrefab: {fileID: 5807120161784160400, guid: 77f18f6079dc80d4fb45237103d7509f, type: 3}
-  turretPrefab: {fileID: 3812622200610940158, guid: 6bb36a974b7ff694b93ff8e88b03f3d9, type: 3}
   gridWidth: 16
   gridHeight: 9
-  turretCost: 100
 --- !u!4 &589925136
 Transform:
   m_ObjectHideFlags: 0
@@ -2600,8 +2598,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ShopManager
   turretPrefab: {fileID: 3812622200610940158, guid: 6bb36a974b7ff694b93ff8e88b03f3d9, type: 3}
+  bombPrefab: {fileID: 0}
   baseTurretCost: 100
+  bombCost: 50
   turretButton1: {fileID: 2099242154}
+  bombButton: {fileID: 170813277}
   currentBuyingText: {fileID: 1253840044}
 --- !u!4 &847394708
 Transform:
