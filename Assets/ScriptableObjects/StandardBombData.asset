@@ -14,5 +14,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::BombData
   bombName: Tactical Bomb
   cost: 50
-  damage: 100
+  damage: 400
   detonationRange: 2

@@ -79,10 +79,10 @@ public class TurretController : MonoBehaviour
 
         HandleCooling();
 
-        // Fetch strictly allocated target from TargetingManager (handles randomization and quotas)
+        // Fetch target from TargetingManager using both the turret and its attack range
         if (TargetingManager.Instance != null)
         {
-            currentTarget = TargetingManager.Instance.GetAssignedTarget(this);
+            currentTarget = TargetingManager.Instance.GetAssignedTarget(this, turretData.attackRange);
         }
         else
         {
@@ -91,7 +91,6 @@ public class TurretController : MonoBehaviour
 
         fireCooldown -= Time.unscaledDeltaTime;
         
-        // Only shoot if we have an allocated target and aren't overheated
         if (currentTarget != null && fireCooldown <= 0f && !isOverheated)
         {
             if (Time.timeScale > 0f)
@@ -168,12 +167,6 @@ public class TurretController : MonoBehaviour
     private void Shoot()
     {
         if (currentTarget == null) return;
-
-        // Inform manager a bullet is en route to count towards the quota limit
-        if (TargetingManager.Instance != null)
-        {
-            TargetingManager.Instance.RegisterBulletFired(currentTarget);
-        }
 
         GameObject bulletObj = ObjectPooler.Instance.SpawnFromPool("Bullet", transform.position, Quaternion.identity);
         if (bulletObj != null)
