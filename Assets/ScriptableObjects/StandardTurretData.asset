@@ -25,4 +25,10 @@ MonoBehaviour:
   upgradeCost: 150
   fireRateMultiplier: 1.2
   damageUpgradeBonus: 25
+  healthUpgradeBonus: 25
   coolingRateMultiplier: 1.5
+  upgradeSprites:
+  - {fileID: 7851470227991654557, guid: 57672af3ce660014aaef8593b48bf032, type: 3}
+  - {fileID: -5530305908028576116, guid: 28aeaffd67da165439df7463c6e71cdc, type: 3}
+  - {fileID: -9087541853823992013, guid: c86ebfdc75245e54ba9df61b098f68b1, type: 3}
+  - {fileID: 5045626991936273123, guid: d39eba3cddb1df24f9275079d235f541, type: 3}

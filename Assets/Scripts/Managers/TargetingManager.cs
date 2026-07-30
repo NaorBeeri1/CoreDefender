@@ -6,11 +6,10 @@ public class TargetingManager : MonoBehaviour
     public static TargetingManager Instance { get; private set; }
 
     [Header("Dispatch Settings")]
-    [SerializeField] private float updateInterval = 0.15f;
+    [SerializeField] private float updateInterval = 0.05f;
     private float updateTimer = 0f;
 
     private Dictionary<TurretController, Transform> turretAssignments = new Dictionary<TurretController, Transform>();
-    private Dictionary<Transform, int> pendingDamageMap = new Dictionary<Transform, int>();
 
     private void Awake()
     {
@@ -34,27 +33,18 @@ public class TargetingManager : MonoBehaviour
         {
             return target;
         }
-        return null;
+        
+        return FindBestTargetForTurret(turret);
     }
 
     public void RegisterBulletFired(Transform target, int damage)
     {
-        if (target != null)
-        {
-            if (!pendingDamageMap.ContainsKey(target))
-                pendingDamageMap[target] = 0;
-            
-            pendingDamageMap[target] += damage;
-        }
+        // Not needed with direct assignment limiting, but kept for compatibility
     }
 
-    // Called by ProjectileController the moment a bullet hits its target
     public void NotifyBulletHit(Transform target, int damage)
     {
-        if (target != null && pendingDamageMap.ContainsKey(target))
-        {
-            pendingDamageMap[target] = Mathf.Max(0, pendingDamageMap[target] - damage);
-        }
+        // Not needed with direct assignment limiting, but kept for compatibility
     }
 
     private void UpdateAssignments()
@@ -64,10 +54,10 @@ public class TargetingManager : MonoBehaviour
         GameObject[] enemyObjs = GameObject.FindGameObjectsWithTag("Enemy");
         GameObject[] turretObjs = GameObject.FindGameObjectsWithTag("Turret");
 
+        turretAssignments.Clear();
+
         if (enemyObjs.Length == 0 || turretObjs.Length == 0)
         {
-            turretAssignments.Clear();
-            pendingDamageMap.Clear();
             return;
         }
 
@@ -86,54 +76,73 @@ public class TargetingManager : MonoBehaviour
         {
             if (eObj != null) activeEnemies.Add(eObj.transform);
         }
+        // Sort strictly by proximity to core (lowest X position first)
         activeEnemies.Sort((a, b) => a.position.x.CompareTo(b.position.x));
 
-        turretAssignments.Clear();
+        // Track how many turrets are currently assigned to each enemy
+        Dictionary<Transform, int> enemyAssignmentCounts = new Dictionary<Transform, int>();
 
         foreach (TurretController turret in availableTurrets)
         {
-            Transform bestTarget = null;
-            TurretData data = turret.GetTurretData();
-            int turretDamage = data != null ? data.damage : 50;
+            Transform chosenEnemy = null;
 
+            // Find the closest enemy that has fewer than 2 turrets targeting it (assuming 2 bullets/turrets are enough to kill a 100 HP enemy with 50 damage)
             foreach (Transform enemy in activeEnemies)
             {
-                int enemyMaxHP = GetEnemyMaxHealth(enemy);
-                int incomingDamage = pendingDamageMap.ContainsKey(enemy) ? pendingDamageMap[enemy] : 0;
+                if (enemy == null) continue;
 
-                // Only assign if incoming mid-air damage hasn't fully covered the enemy's HP yet
-                if (incomingDamage < enemyMaxHP)
+                int assignedCount = enemyAssignmentCounts.ContainsKey(enemy) ? enemyAssignmentCounts[enemy] : 0;
+
+                // Limit to 2 turrets per enemy at a time to prevent unnecessary overkills
+                if (assignedCount < 2)
                 {
-                    bestTarget = enemy;
-                    if (!pendingDamageMap.ContainsKey(enemy)) pendingDamageMap[enemy] = 0;
-                    pendingDamageMap[enemy] += turretDamage;
+                    chosenEnemy = enemy;
                     break;
                 }
             }
 
-            if (bestTarget != null)
+            // Fallback: if all enemies already have 2 turrets, target the absolute closest one anyway
+            if (chosenEnemy == null && activeEnemies.Count > 0)
             {
-                turretAssignments[turret] = bestTarget;
+                chosenEnemy = activeEnemies[0];
+            }
+
+            if (chosenEnemy != null)
+            {
+                turretAssignments[turret] = chosenEnemy;
+                if (!enemyAssignmentCounts.ContainsKey(chosenEnemy)) enemyAssignmentCounts[chosenEnemy] = 0;
+                enemyAssignmentCounts[chosenEnemy]++;
             }
         }
     }
 
-    private int GetEnemyMaxHealth(Transform enemyTransform)
+    private Transform FindBestTargetForTurret(TurretController turret)
     {
-        LaserDroneController drone = enemyTransform.GetComponent<LaserDroneController>();
-        if (drone != null) return 150;
+        GameObject[] enemyObjs = GameObject.FindGameObjectsWithTag("Enemy");
+        if (enemyObjs.Length == 0) return null;
 
-        return 100; // Standard enemy HP
+        Transform closest = null;
+        float minX = float.MaxValue;
+
+        foreach (GameObject e in enemyObjs)
+        {
+            if (e != null && e.transform.position.x < minX)
+            {
+                minX = e.transform.position.x;
+                closest = e.transform;
+            }
+        }
+        return closest ?? enemyObjs[0].transform;
     }
 
     private void CleanCollections()
     {
-        List<Transform> damageKeys = new List<Transform>(pendingDamageMap.Keys);
-        foreach (var target in damageKeys)
+        List<TurretController> keys = new List<TurretController>(turretAssignments.Keys);
+        foreach (var key in keys)
         {
-            if (target == null)
+            if (key == null || turretAssignments[key] == null)
             {
-                pendingDamageMap.Remove(target);
+                turretAssignments.Remove(key);
             }
         }
     }

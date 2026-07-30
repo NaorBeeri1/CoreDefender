@@ -8,7 +8,7 @@ public class WaveManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI waveAnnouncementText; 
     [SerializeField] private TextMeshProUGUI waveCounterText;     
     [SerializeField] private TextMeshProUGUI waveCountdownText;   
-    [SerializeField] private TextMeshProUGUI enemiesRemainingText; // <-- Added UI link
+    [SerializeField] private TextMeshProUGUI enemiesRemainingText;
 
     [Header("Wave Base Settings")]
     [SerializeField] private GameObject standardEnemyPrefab; 
@@ -20,9 +20,10 @@ public class WaveManager : MonoBehaviour
 
     private int currentWaveNumber = 1;
     private bool isWaveActive = false;
-    private int enemiesRemainingAlive = 0;
     private int totalEnemiesThisWave = 0;
+    private int enemiesDefeatedThisWave = 0;
     private float currentCountdownTimer = 0f;
+    private bool isSpawningWave = false;
 
     private void Start()
     {
@@ -34,6 +35,22 @@ public class WaveManager : MonoBehaviour
 
         UpdateUI();
         StartCoroutine(WaveCountdownRoutine());
+    }
+
+    private void Update()
+    {
+        if (isWaveActive && !isSpawningWave)
+        {
+            GameObject[] remainingEnemies = GameObject.FindGameObjectsWithTag("Enemy");
+
+            // If all physical enemies are gone from the screen, immediately clear the wave!
+            if (remainingEnemies.Length == 0)
+            {
+                AdvanceToNextWave();
+            }
+        }
+        
+        UpdateUI(); // Keep UI updated continuously for live counts
     }
 
     private IEnumerator WaveCountdownRoutine()
@@ -64,18 +81,30 @@ public class WaveManager : MonoBehaviour
     private IEnumerator StartNextWaveRoutine()
     {
         isWaveActive = true;
-        totalEnemiesThisWave = Mathf.RoundToInt(5 + (currentWaveNumber * 3)); 
-        float spawnInterval = Mathf.Max(0.3f, 1.5f - (currentWaveNumber * 0.08f)); 
+        isSpawningWave = true;
+        
+        totalEnemiesThisWave = Mathf.RoundToInt(5 + (currentWaveNumber * 3));
+        enemiesDefeatedThisWave = 0;
+
+        float spawnInterval = Mathf.Max(0.5f, 2.0f - (currentWaveNumber * 0.08f)); 
         float healthMultiplier = 1f + (currentWaveNumber * 0.2f); 
 
-        enemiesRemainingAlive = totalEnemiesThisWave;
-        UpdateUI();
-
-        for (int i = 0; i < totalEnemiesThisWave; i++)
+        int spawnedCount = 0;
+        while (spawnedCount < totalEnemiesThisWave)
         {
-            SpawnEnemy(healthMultiplier);
+            int enemiesToSpawnNow = Random.Range(1, 4);
+
+            for (int i = 0; i < enemiesToSpawnNow && spawnedCount < totalEnemiesThisWave; i++)
+            {
+                SpawnEnemy(healthMultiplier);
+                spawnedCount++;
+            }
+
+            UpdateUI();
             yield return new WaitForSeconds(spawnInterval);
         }
+
+        isSpawningWave = false; 
     }
 
     private void SpawnEnemy(float healthMultiplier)
@@ -88,21 +117,24 @@ public class WaveManager : MonoBehaviour
             float randomY = Random.Range(minY, maxY);
             Vector3 spawnPosition = new Vector3(spawnXPosition, randomY, 0f);
 
-            Instantiate(prefabToSpawn, spawnPosition, Quaternion.identity);
+            GameObject enemy = Instantiate(prefabToSpawn, spawnPosition, Quaternion.identity);
+            enemy.tag = "Enemy"; 
         }
     }
 
     public void NotifyEnemyDefeated()
     {
-        enemiesRemainingAlive = Mathf.Max(0, enemiesRemainingAlive - 1);
+        enemiesDefeatedThisWave++;
         UpdateUI();
+    }
 
-        if (enemiesRemainingAlive <= 0 && isWaveActive)
-        {
-            isWaveActive = false;
-            currentWaveNumber++;
-            StartCoroutine(WaveCountdownRoutine());
-        }
+    private void AdvanceToNextWave()
+    {
+        if (!isWaveActive) return;
+
+        isWaveActive = false;
+        currentWaveNumber++;
+        StartCoroutine(WaveCountdownRoutine());
     }
 
     private void UpdateUI()
@@ -113,7 +145,14 @@ public class WaveManager : MonoBehaviour
         }
         if (enemiesRemainingText != null)
         {
-            enemiesRemainingText.text = $"Enemies: {enemiesRemainingAlive}";
+            // Total enemies left in this wave = Total scheduled minus those already defeated
+            int enemiesLeft = Mathf.Max(0, totalEnemiesThisWave - enemiesDefeatedThisWave);
+            
+            // Failsafe backup: if physical count on screen is higher (due to edge cases), use that instead
+            GameObject[] physicalEnemies = GameObject.FindGameObjectsWithTag("Enemy");
+            int finalCount = Mathf.Max(enemiesLeft, physicalEnemies.Length);
+
+            enemiesRemainingText.text = $"Enemies: {finalCount}";
         }
     }
 }

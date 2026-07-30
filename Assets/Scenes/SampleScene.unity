@@ -1157,7 +1157,7 @@ MonoBehaviour:
   spawnXPosition: 9
   minY: -4
   maxY: 4
-  timeBetweenWaves: 10
+  timeBetweenWaves: 1
 --- !u!4 &196021294
 Transform:
   m_ObjectHideFlags: 0
