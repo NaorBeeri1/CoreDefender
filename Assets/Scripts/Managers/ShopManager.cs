@@ -8,12 +8,15 @@ public class ShopManager : MonoBehaviour
 
     [Header("Shop Configuration")]
     [SerializeField] private GameObject turretPrefab; 
+    [SerializeField] private GameObject sniperTurretPrefab; // Added Sniper Prefab
     [SerializeField] private GameObject bombPrefab;
     [SerializeField] private int baseTurretCost = 100;
+    [SerializeField] private int sniperTurretCost = 200;    // Added Sniper Cost
     [SerializeField] private int bombCost = 50;
 
     [Header("UI References")]
     [SerializeField] private Button turretButton1; 
+    [SerializeField] private Button sniperButton;         // Added Sniper Button Reference
     [SerializeField] private Button bombButton; 
     [SerializeField] private TextMeshProUGUI currentBuyingText; 
 
@@ -34,6 +37,11 @@ public class ShopManager : MonoBehaviour
             turretButton1.onClick.AddListener(() => SelectItemToBuy("Base Turret", baseTurretCost, turretPrefab));
         }
 
+        if (sniperButton != null)
+        {
+            sniperButton.onClick.AddListener(() => SelectItemToBuy("Laser Sniper", sniperTurretCost, sniperTurretPrefab));
+        }
+
         if (bombButton != null)
         {
             bombButton.onClick.AddListener(() => SelectItemToBuy("Tactical Bomb", bombCost, bombPrefab));
@@ -43,7 +51,7 @@ public class ShopManager : MonoBehaviour
 
     private void Update()
     {
-        int currentCost = (selectedItemName == "Tactical Bomb") ? bombCost : baseTurretCost;
+        int currentCost = GetActiveItemCost();
         if (isBuyingMode && PlayerStats.Instance != null && PlayerStats.Instance.GetCurrentCredits() < currentCost)
         {
             CancelPurchase();
@@ -74,7 +82,9 @@ public class ShopManager : MonoBehaviour
 
     public int GetActiveItemCost()
     {
-        return (selectedItemName == "Tactical Bomb") ? bombCost : baseTurretCost;
+        if (selectedItemName == "Laser Sniper") return sniperTurretCost;
+        if (selectedItemName == "Tactical Bomb") return bombCost;
+        return baseTurretCost;
     }
 
     public bool IsBuyingMode()
@@ -89,7 +99,7 @@ public class ShopManager : MonoBehaviour
             PlayerStats.Instance.SpendCredits(cost);
         }
 
-        int currentCost = (selectedItemName == "Tactical Bomb") ? bombCost : baseTurretCost;
+        int currentCost = GetActiveItemCost();
         if (PlayerStats.Instance != null && PlayerStats.Instance.GetCurrentCredits() < currentCost)
         {
             CancelPurchase();

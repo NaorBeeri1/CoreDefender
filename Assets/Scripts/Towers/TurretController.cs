@@ -5,9 +5,25 @@ using TMPro;
 
 public class TurretController : MonoBehaviour
 {
-    [Header("Data Profile")]
-    [SerializeField] private TurretData originalTurretData; 
-    private TurretData turretData;                            
+    [Header("Data Profiles (Assign either TurretData or SniperTurretData)")]
+    [SerializeField] private ScriptableObject turretDataAsset; 
+    
+    // Runtime properties unified
+    private string turretName = "Turret";
+    private float fireRate = 1f;
+    private float attackRange = 5f;
+    private int damage = 50;
+    private float maxHeat = 100f;
+    private float heatPerShot = 15f;
+    private float coolingRate = 40f;
+    private int currentUpgradeLevel = 0;
+    private int maxUpgradeLevel = 3;
+    private int upgradeCost = 150;
+    private float fireRateMultiplier = 1.2f;
+    private int damageUpgradeBonus = 25;
+    private int healthUpgradeBonus = 25;
+    private float coolingRateMultiplier = 1.5f;
+    private Sprite[] upgradeSprites;
 
     [Header("Combat References")]
     [SerializeField] private GameObject bulletPrefab;
@@ -30,14 +46,7 @@ public class TurretController : MonoBehaviour
 
     private void Start()
     {
-        if (originalTurretData != null)
-        {
-            turretData = Instantiate(originalTurretData);
-            turretData.currentUpgradeLevel = 0;
-            turretData.damage = 50; 
-            turretData.fireRate = 1f;
-        }
-
+        InitializeData();
         currentHealth = maxHealth;
 
         if (spriteRenderer == null)
@@ -81,15 +90,57 @@ public class TurretController : MonoBehaviour
         }
     }
 
+    private void InitializeData()
+    {
+        if (turretDataAsset is SniperTurretData sniperData)
+        {
+            turretName = sniperData.turretName;
+            fireRate = sniperData.fireRate;
+            attackRange = sniperData.attackRange;
+            damage = sniperData.damage;
+            maxHeat = sniperData.maxHeat;
+            heatPerShot = sniperData.heatPerShot;
+            coolingRate = sniperData.coolingRate;
+            currentUpgradeLevel = sniperData.currentUpgradeLevel;
+            maxUpgradeLevel = sniperData.maxUpgradeLevel;
+            upgradeCost = sniperData.upgradeCost;
+            fireRateMultiplier = sniperData.fireRateMultiplier;
+            damageUpgradeBonus = sniperData.damageUpgradeBonus;
+            healthUpgradeBonus = sniperData.healthUpgradeBonus;
+            coolingRateMultiplier = sniperData.coolingRateMultiplier;
+            upgradeSprites = sniperData.upgradeSprites;
+        }
+        else if (turretDataAsset is TurretData normalData)
+        {
+            turretName = normalData.turretName;
+            fireRate = normalData.fireRate;
+            attackRange = normalData.attackRange;
+            damage = normalData.damage;
+            maxHeat = normalData.maxHeat;
+            heatPerShot = normalData.heatPerShot;
+            coolingRate = normalData.coolingRate;
+            currentUpgradeLevel = normalData.currentUpgradeLevel;
+            maxUpgradeLevel = normalData.maxUpgradeLevel;
+            upgradeCost = normalData.upgradeCost;
+            fireRateMultiplier = normalData.fireRateMultiplier;
+            damageUpgradeBonus = normalData.damageUpgradeBonus;
+            healthUpgradeBonus = normalData.healthUpgradeBonus;
+            coolingRateMultiplier = normalData.coolingRateMultiplier;
+            upgradeSprites = normalData.upgradeSprites;
+        }
+        else
+        {
+            Debug.LogWarning($"[TurretController] No valid TurretData or SniperTurretData assigned to {gameObject.name}!");
+        }
+    }
+
     private void Update()
     {
-        if (turretData == null) return;
-
         HandleCooling();
 
         if (TargetingManager.Instance != null)
         {
-            currentTarget = TargetingManager.Instance.GetAssignedTarget(this, turretData.attackRange);
+            currentTarget = TargetingManager.Instance.GetAssignedTarget(this, attackRange);
         }
         else
         {
@@ -103,7 +154,7 @@ public class TurretController : MonoBehaviour
             if (Time.timeScale > 0f)
             {
                 Shoot();
-                fireCooldown = 1f / turretData.fireRate;
+                fireCooldown = 1f / fireRate;
             }
         }
 
@@ -111,9 +162,9 @@ public class TurretController : MonoBehaviour
         HandleSelectionInput();
     }
 
-    public void TakeDamage(int damage)
+    public void TakeDamage(int incomingDamage)
     {
-        currentHealth -= damage;
+        currentHealth -= incomingDamage;
         if (currentHealth < 0) currentHealth = 0;
 
         if (currentHealth <= 0)
@@ -143,23 +194,52 @@ public class TurretController : MonoBehaviour
         }
     }
 
-    public TurretData GetTurretData() => turretData;
+    // --- Runtime proxy structures for TargetingManager and TurretUIManager compatibility ---
+    public class RuntimeTurretProxy
+    {
+        public int damage;
+        public float fireRate;
+        public float attackRange;
+        public int currentUpgradeLevel;
+        public int maxUpgradeLevel;
+        public int upgradeCost;
+        public float fireRateMultiplier;
+        public int damageUpgradeBonus;
+        public int healthUpgradeBonus;
+    }
+
+    public RuntimeTurretProxy GetTurretData()
+    {
+        return new RuntimeTurretProxy
+        {
+            damage = this.damage,
+            fireRate = this.fireRate,
+            attackRange = this.attackRange,
+            currentUpgradeLevel = this.currentUpgradeLevel,
+            maxUpgradeLevel = this.maxUpgradeLevel,
+            upgradeCost = this.upgradeCost,
+            fireRateMultiplier = this.fireRateMultiplier,
+            damageUpgradeBonus = this.damageUpgradeBonus,
+            healthUpgradeBonus = this.healthUpgradeBonus
+        };
+    }
+
     public int GetCurrentHealth() => currentHealth;
     public int GetMaxHealth() => maxHealth;
 
     public void ExecuteUpgrade()
     {
-        if (turretData == null || turretData.currentUpgradeLevel >= turretData.maxUpgradeLevel) return;
+        if (currentUpgradeLevel >= maxUpgradeLevel) return;
 
-        if (PlayerStats.Instance != null && PlayerStats.Instance.SpendCredits(turretData.upgradeCost))
+        if (PlayerStats.Instance != null && PlayerStats.Instance.SpendCredits(upgradeCost))
         {
-            turretData.currentUpgradeLevel++;
-            turretData.damage += turretData.damageUpgradeBonus; 
-            turretData.fireRate *= turretData.fireRateMultiplier;
-            turretData.coolingRate *= turretData.coolingRateMultiplier;
+            currentUpgradeLevel++;
+            damage += damageUpgradeBonus; 
+            fireRate *= fireRateMultiplier;
+            coolingRate *= coolingRateMultiplier;
 
-            maxHealth += turretData.healthUpgradeBonus;
-            currentHealth += turretData.healthUpgradeBonus;
+            maxHealth += healthUpgradeBonus;
+            currentHealth += healthUpgradeBonus;
 
             UpdateTurretVisuals();
         }
@@ -167,12 +247,12 @@ public class TurretController : MonoBehaviour
 
     private void UpdateTurretVisuals()
     {
-        if (spriteRenderer != null && turretData.upgradeSprites != null)
+        if (spriteRenderer != null && upgradeSprites != null)
         {
-            int index = turretData.currentUpgradeLevel;
-            if (index >= 0 && index < turretData.upgradeSprites.Length && turretData.upgradeSprites[index] != null)
+            int index = currentUpgradeLevel;
+            if (index >= 0 && index < upgradeSprites.Length && upgradeSprites[index] != null)
             {
-                spriteRenderer.sprite = turretData.upgradeSprites[index];
+                spriteRenderer.sprite = upgradeSprites[index];
             }
         }
     }
@@ -181,7 +261,7 @@ public class TurretController : MonoBehaviour
     {
         int baseRefund = 75;
         int upgradeRefundBonus = 50;
-        int totalRefund = baseRefund + (turretData.currentUpgradeLevel * upgradeRefundBonus);
+        int totalRefund = baseRefund + (currentUpgradeLevel * upgradeRefundBonus);
 
         if (PlayerStats.Instance != null)
         {
@@ -196,22 +276,25 @@ public class TurretController : MonoBehaviour
 
         if (TargetingManager.Instance != null)
         {
-            TargetingManager.Instance.RegisterBulletFired(currentTarget, turretData.damage);
+            TargetingManager.Instance.RegisterBulletFired(currentTarget, damage);
         }
 
-        GameObject bulletObj = ObjectPooler.Instance.SpawnFromPool("Bullet", transform.position, Quaternion.identity);
+        GameObject bulletObj = ObjectPooler.Instance != null ? 
+            ObjectPooler.Instance.SpawnFromPool("Bullet", transform.position, Quaternion.identity) : 
+            Instantiate(bulletPrefab, transform.position, Quaternion.identity);
+
         if (bulletObj != null)
         {
             ProjectileController projectile = bulletObj.GetComponent<ProjectileController>();
             if (projectile != null)
             {
                 projectile.SetTarget(currentTarget);
-                projectile.SetDamage(turretData.damage);
+                projectile.SetDamage(damage);
             }
         }
 
-        currentHeat += turretData.heatPerShot;
-        if (currentHeat >= turretData.maxHeat)
+        currentHeat += heatPerShot;
+        if (currentHeat >= maxHeat)
         {
             isOverheated = true;
         }
@@ -221,7 +304,7 @@ public class TurretController : MonoBehaviour
     {
         if (currentHeat > 0f)
         {
-            currentHeat -= turretData.coolingRate * Time.unscaledDeltaTime;
+            currentHeat -= coolingRate * Time.unscaledDeltaTime;
             if (currentHeat <= 0f)
             {
                 currentHeat = 0f;
@@ -232,9 +315,9 @@ public class TurretController : MonoBehaviour
 
     private void UpdateHeatAndHPUI()
     {
-        if (fillBarImage != null && turretData != null)
+        if (fillBarImage != null)
         {
-            fillBarImage.fillAmount = currentHeat / turretData.maxHeat;
+            fillBarImage.fillAmount = currentHeat / maxHeat;
             fillBarImage.color = isOverheated ? new Color(1f, 0.1f, 0.302f, 1f) : new Color(0.102f, 0.902f, 1f, 1f);
         }
 

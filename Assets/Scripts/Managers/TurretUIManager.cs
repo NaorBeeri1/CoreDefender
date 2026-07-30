@@ -72,7 +72,7 @@ public class TurretUIManager : MonoBehaviour
     {
         if (selectedTurret == null) return;
 
-        TurretData data = selectedTurret.GetTurretData();
+        var data = selectedTurret.GetTurretData();
         if (data == null) return;
 
         int baseRefund = 75;
@@ -114,7 +114,9 @@ public class TurretUIManager : MonoBehaviour
                                         $"Fire Rate: {data.fireRate:F1}/s  ->  <color=#1AE6FF>{nextFireRate:F1}/s</color>\n" +
                                         $"Range: {data.attackRange}";
             }
-            if (upgradeButtonText != null) upgradeButtonText.text = $"UPGRADE ({data.upgradeCost}c)";
+            // Using standard upgrade cost calculation or fallback default if not exposed directly
+            int nextUpgradeCost = 150 + (data.currentUpgradeLevel * 50);
+            if (upgradeButtonText != null) upgradeButtonText.text = $"UPGRADE ({nextUpgradeCost}c)";
             if (upgradeButton != null) upgradeButton.interactable = true;
         }
     }

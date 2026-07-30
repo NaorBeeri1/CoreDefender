@@ -1489,7 +1489,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Bomb\n50c
+  m_text: Sniper Turret\n200c
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -2431,7 +2431,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 757061b199138274bb31016182ff815d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TargetingManager
-  updateInterval: 0.5
+  updateInterval: 0.05
 --- !u!4 &732430258
 Transform:
   m_ObjectHideFlags: 0
@@ -2598,11 +2598,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ShopManager
   turretPrefab: {fileID: 3812622200610940158, guid: 6bb36a974b7ff694b93ff8e88b03f3d9, type: 3}
+  sniperTurretPrefab: {fileID: 8397219193441616641, guid: 37d128dc40dade54e85bdff5fda8b3f9, type: 3}
   bombPrefab: {fileID: 3812622200610940158, guid: 43ca316795b785542bde7b1b79822332, type: 3}
   baseTurretCost: 100
+  sniperTurretCost: 200
   bombCost: 50
   turretButton1: {fileID: 2099242154}
-  bombButton: {fileID: 170813277}
+  sniperButton: {fileID: 170813277}
+  bombButton: {fileID: 1351915594}
   currentBuyingText: {fileID: 1253840044}
 --- !u!4 &847394708
 Transform:
@@ -4480,7 +4483,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Locked\n---
+  m_text: Bomb\n100c
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
