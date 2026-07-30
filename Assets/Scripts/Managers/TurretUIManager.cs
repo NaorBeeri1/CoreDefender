@@ -12,7 +12,7 @@ public class TurretUIManager : MonoBehaviour
     [SerializeField] private Button upgradeButton;
     [SerializeField] private TextMeshProUGUI upgradeButtonText;
     [SerializeField] private Button sellButton;
-    [SerializeField] private TextMeshProUGUI sellButtonText; // Make sure to assign this or find it dynamically
+    [SerializeField] private TextMeshProUGUI sellButtonText; 
     [SerializeField] private Button closeButton;
 
     private TurretController selectedTurret;
@@ -44,7 +44,6 @@ public class TurretUIManager : MonoBehaviour
         if (sellButton != null)
         {
             sellButton.onClick.AddListener(OnSellClicked);
-            // Automatically grab the TextMeshProUGUI on the sell button if not manually assigned
             if (sellButtonText == null)
             {
                 sellButtonText = sellButton.GetComponentInChildren<TextMeshProUGUI>();
@@ -76,7 +75,6 @@ public class TurretUIManager : MonoBehaviour
         TurretData data = selectedTurret.GetTurretData();
         if (data == null) return;
 
-        // Calculate dynamic refund amount matching TurretController
         int baseRefund = 75;
         int upgradeRefundBonus = 50;
         int totalRefund = baseRefund + (data.currentUpgradeLevel * upgradeRefundBonus);
@@ -86,11 +84,15 @@ public class TurretUIManager : MonoBehaviour
             sellButtonText.text = $"SELL (Refund {totalRefund}c)";
         }
 
+        int currentHP = selectedTurret.GetCurrentHealth();
+        int maxHP = selectedTurret.GetMaxHealth();
+
         if (data.currentUpgradeLevel >= data.maxUpgradeLevel)
         {
             if (statsDisplayText != null)
             {
                 statsDisplayText.text = $"MAX TIER REACHED (Tier {data.currentUpgradeLevel}/{data.maxUpgradeLevel})\n\n" +
+                                        $"Current Health: {currentHP} / {maxHP} HP\n" +
                                         $"Current Damage: {data.damage} HP\n" +
                                         $"Current Fire Rate: {data.fireRate:F1} /s\n" +
                                         $"Attack Range: {data.attackRange}";
@@ -102,10 +104,12 @@ public class TurretUIManager : MonoBehaviour
         {
             int nextDamage = data.damage + data.damageUpgradeBonus;
             float nextFireRate = data.fireRate * data.fireRateMultiplier;
+            int nextMaxHP = maxHP + data.healthUpgradeBonus;
 
             if (statsDisplayText != null)
             {
                 statsDisplayText.text = $"Tactic Level: Tier {data.currentUpgradeLevel} / {data.maxUpgradeLevel}\n\n" +
+                                        $"Health: {currentHP} / {maxHP} HP  ->  <color=#1AE6FF>{currentHP} / {nextMaxHP} HP</color>\n" +
                                         $"Damage: {data.damage} HP  ->  <color=#1AE6FF>{nextDamage} HP</color>\n" +
                                         $"Fire Rate: {data.fireRate:F1}/s  ->  <color=#1AE6FF>{nextFireRate:F1}/s</color>\n" +
                                         $"Range: {data.attackRange}";
@@ -131,7 +135,7 @@ public class TurretUIManager : MonoBehaviour
         if (selectedTurret != null)
         {
             selectedTurret.ExecuteUpgrade();
-            UpdateMenuDisplay(); // Instantly updates UI tier, stats text, and dynamic sell refund!
+            UpdateMenuDisplay(); 
         }
     }
 

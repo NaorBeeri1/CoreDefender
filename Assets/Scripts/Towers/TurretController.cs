@@ -11,6 +11,7 @@ public class TurretController : MonoBehaviour
 
     [Header("Combat References")]
     [SerializeField] private GameObject bulletPrefab;
+    [SerializeField] private SpriteRenderer spriteRenderer; 
 
     [Header("UI References")]
     [SerializeField] private GameObject turretCanvasPrefab;
@@ -29,8 +30,6 @@ public class TurretController : MonoBehaviour
 
     private void Start()
     {
-        currentHealth = maxHealth;
-
         if (originalTurretData != null)
         {
             turretData = Instantiate(originalTurretData);
@@ -38,6 +37,15 @@ public class TurretController : MonoBehaviour
             turretData.damage = 50; 
             turretData.fireRate = 1f;
         }
+
+        currentHealth = maxHealth;
+
+        if (spriteRenderer == null)
+        {
+            spriteRenderer = GetComponent<SpriteRenderer>();
+        }
+
+        UpdateTurretVisuals();
 
         if (turretCanvasPrefab != null)
         {
@@ -79,7 +87,6 @@ public class TurretController : MonoBehaviour
 
         HandleCooling();
 
-        // Fetch target from TargetingManager using both the turret and its attack range
         if (TargetingManager.Instance != null)
         {
             currentTarget = TargetingManager.Instance.GetAssignedTarget(this, turretData.attackRange);
@@ -137,6 +144,8 @@ public class TurretController : MonoBehaviour
     }
 
     public TurretData GetTurretData() => turretData;
+    public int GetCurrentHealth() => currentHealth;
+    public int GetMaxHealth() => maxHealth;
 
     public void ExecuteUpgrade()
     {
@@ -148,6 +157,23 @@ public class TurretController : MonoBehaviour
             turretData.damage += turretData.damageUpgradeBonus; 
             turretData.fireRate *= turretData.fireRateMultiplier;
             turretData.coolingRate *= turretData.coolingRateMultiplier;
+
+            maxHealth += turretData.healthUpgradeBonus;
+            currentHealth += turretData.healthUpgradeBonus;
+
+            UpdateTurretVisuals();
+        }
+    }
+
+    private void UpdateTurretVisuals()
+    {
+        if (spriteRenderer != null && turretData.upgradeSprites != null)
+        {
+            int index = turretData.currentUpgradeLevel;
+            if (index >= 0 && index < turretData.upgradeSprites.Length && turretData.upgradeSprites[index] != null)
+            {
+                spriteRenderer.sprite = turretData.upgradeSprites[index];
+            }
         }
     }
 
@@ -167,6 +193,11 @@ public class TurretController : MonoBehaviour
     private void Shoot()
     {
         if (currentTarget == null) return;
+
+        if (TargetingManager.Instance != null)
+        {
+            TargetingManager.Instance.RegisterBulletFired(currentTarget, turretData.damage);
+        }
 
         GameObject bulletObj = ObjectPooler.Instance.SpawnFromPool("Bullet", transform.position, Quaternion.identity);
         if (bulletObj != null)
@@ -209,7 +240,7 @@ public class TurretController : MonoBehaviour
 
         if (turretHpText != null)
         {
-            turretHpText.text = $"{currentHealth} HP";
+            turretHpText.text = $"{currentHealth} / {maxHealth} HP";
         }
     }
 }

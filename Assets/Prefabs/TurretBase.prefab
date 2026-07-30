@@ -28,7 +28,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -3.5186, y: -5.3213, z: 0}
-  m_LocalScale: {x: 0.1, y: 0.1, z: 1}
+  m_LocalScale: {x: 0.2, y: 0.2, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -90,7 +90,7 @@ SpriteRenderer:
   m_Size: {x: 1, y: 1}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 1
+  m_WasSpriteAssigned: 0
   m_SpriteSortPoint: 0
 --- !u!114 &492851781696976095
 MonoBehaviour:
@@ -106,4 +106,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::TurretController
   originalTurretData: {fileID: 11400000, guid: 27ce4fe7511d2a04fb37fbcbadf47b5d, type: 2}
   bulletPrefab: {fileID: 6367061635586260010, guid: ccfc1bda9fbde964ba39659b1ea8876e, type: 3}
+  spriteRenderer: {fileID: 0}
   turretCanvasPrefab: {fileID: 2470467838436904971, guid: 536a99ea2cd1e2a479e0a433f52a9708, type: 3}
+  maxHealth: 100

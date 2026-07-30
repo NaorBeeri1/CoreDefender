@@ -10,12 +10,12 @@ public class TurretData : ScriptableObject
     [Header("Base Combat Stats")]
     public float fireRate = 2.5f;     
     public float attackRange = 5f;
-    public int damage = 50;           
+    public int damage = 50;            
 
     [Header("Thermal Limits & Cooling")]
     public float maxHeat = 100f;
     public float heatPerShot = 15f;
-    public float coolingRate = 40f;   // <-- HIGHER NUMBER = FASTER COOLING (RELOAD SPEED)
+    public float coolingRate = 40f;   
 
     [Header("Multi-Tier Upgrades")]
     public int currentUpgradeLevel = 0;
@@ -23,5 +23,9 @@ public class TurretData : ScriptableObject
     public int upgradeCost = 150;
     public float fireRateMultiplier = 1.2f;
     public int damageUpgradeBonus = 25; 
-    public float coolingRateMultiplier = 1.5f; // Upgrades make it cool down 50% faster!
+    public int healthUpgradeBonus = 25; 
+    public float coolingRateMultiplier = 1.5f; 
+
+    [Header("Visual Evolution")]
+    public Sprite[] upgradeSprites; // Index 0 = Base Level, Index 1 = Tier 1, etc.
 }
