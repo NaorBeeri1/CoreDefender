@@ -1157,7 +1157,7 @@ MonoBehaviour:
   spawnXPosition: 9
   minY: -4
   maxY: 4
-  timeBetweenWaves: 1
+  timeBetweenWaves: 4
 --- !u!4 &196021294
 Transform:
   m_ObjectHideFlags: 0
@@ -2600,7 +2600,7 @@ MonoBehaviour:
   turretPrefab: {fileID: 3812622200610940158, guid: 6bb36a974b7ff694b93ff8e88b03f3d9, type: 3}
   sniperTurretPrefab: {fileID: 8397219193441616641, guid: 37d128dc40dade54e85bdff5fda8b3f9, type: 3}
   bombPrefab: {fileID: 3812622200610940158, guid: 43ca316795b785542bde7b1b79822332, type: 3}
-  cryoTurretPrefab: {fileID: 0}
+  cryoTurretPrefab: {fileID: 3812622200610940158, guid: 9be8edc0db45bee49a7059704d517c80, type: 3}
   baseTurretCost: 100
   sniperTurretCost: 200
   bombCost: 50
