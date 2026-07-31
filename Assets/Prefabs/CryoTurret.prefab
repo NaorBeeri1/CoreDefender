@@ -10,9 +10,9 @@ GameObject:
   m_Component:
   - component: {fileID: 2557564434888870594}
   - component: {fileID: 8255142247743634330}
-  - component: {fileID: 492851781696976095}
+  - component: {fileID: 6940995734087344828}
   m_Layer: 0
-  m_Name: TurretBase
+  m_Name: CryoTurret
   m_TagString: Turret
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -82,7 +82,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 7851470227991654557, guid: 57672af3ce660014aaef8593b48bf032, type: 3}
+  m_Sprite: {fileID: 5869892073235460741, guid: 9117a862180ec824db2c3a981a5da8b6, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -92,7 +92,7 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
---- !u!114 &492851781696976095
+--- !u!114 &6940995734087344828
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -104,8 +104,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 01b58cdf75286234ab428f4b1d96ff93, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TurretController
-  turretDataAsset: {fileID: 0}
-  bulletPrefab: {fileID: 6367061635586260010, guid: ccfc1bda9fbde964ba39659b1ea8876e, type: 3}
+  turretDataAsset: {fileID: 11400000, guid: 58533b182c7cbbf47828c41e8a6319da, type: 2}
+  bulletPrefab: {fileID: 0}
   spriteRenderer: {fileID: 0}
   turretCanvasPrefab: {fileID: 2470467838436904971, guid: 536a99ea2cd1e2a479e0a433f52a9708, type: 3}
   maxHealth: 100

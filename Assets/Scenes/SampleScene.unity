@@ -297,7 +297,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'Credits: 300'
+  m_text: 'Credits: 300c'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -2600,12 +2600,15 @@ MonoBehaviour:
   turretPrefab: {fileID: 3812622200610940158, guid: 6bb36a974b7ff694b93ff8e88b03f3d9, type: 3}
   sniperTurretPrefab: {fileID: 8397219193441616641, guid: 37d128dc40dade54e85bdff5fda8b3f9, type: 3}
   bombPrefab: {fileID: 3812622200610940158, guid: 43ca316795b785542bde7b1b79822332, type: 3}
+  cryoTurretPrefab: {fileID: 0}
   baseTurretCost: 100
   sniperTurretCost: 200
   bombCost: 50
+  cryoTurretCost: 150
   turretButton1: {fileID: 2099242154}
   sniperButton: {fileID: 170813277}
   bombButton: {fileID: 1351915594}
+  cryoButton: {fileID: 1716472600}
   currentBuyingText: {fileID: 1253840044}
 --- !u!4 &847394708
 Transform:
@@ -3124,7 +3127,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Locked\n---
+  m_text: Cyro Turret\n150c
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -4483,7 +4486,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Bomb\n100c
+  m_text: Bomb\n50c
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}

@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3ed4c1d124131284c83a8f73ae2c137d, type: 3}
+  m_Name: StandardCryoData
+  m_EditorClassIdentifier: Assembly-CSharp::TurretData
+  turretName: Cryo Emitter
+  cost: 150
+  fireRate: 1
+  attackRange: 5
+  damage: 10
+  maxHeat: 100
+  heatPerShot: 20
+  coolingRate: 40
+  currentUpgradeLevel: 0
+  maxUpgradeLevel: 3
+  upgradeCost: 150
+  fireRateMultiplier: 1.2
+  damageUpgradeBonus: 25
+  healthUpgradeBonus: 25
+  coolingRateMultiplier: 1.5
+  upgradeSprites: []

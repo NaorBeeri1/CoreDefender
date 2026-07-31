@@ -10,6 +10,14 @@ public class TargetingManager : MonoBehaviour
     private float updateTimer = 0f;
 
     private Dictionary<TurretController, Transform> turretAssignments = new Dictionary<TurretController, Transform>();
+    private Dictionary<Transform, int> inFlightDamage = new Dictionary<Transform, int>();
+
+    private class TurretInfo
+    {
+        public TurretController turret;
+        public int damage;
+        public bool isCryo;
+    }
 
     private void Awake()
     {
@@ -29,22 +37,28 @@ public class TargetingManager : MonoBehaviour
 
     public Transform GetAssignedTarget(TurretController turret, float attackRange = 0f)
     {
-        if (turretAssignments.TryGetValue(turret, out Transform target) && target != null)
+        if (turret != null && turretAssignments.TryGetValue(turret, out Transform target) && target != null)
         {
             return target;
         }
-        
-        return FindBestTargetForTurret(turret);
+        return null;
     }
 
     public void RegisterBulletFired(Transform target, int damage)
     {
-        // Not needed with direct assignment limiting, but kept for compatibility
+        if (target == null) return;
+        if (!inFlightDamage.ContainsKey(target)) inFlightDamage[target] = 0;
+        inFlightDamage[target] += damage;
     }
 
     public void NotifyBulletHit(Transform target, int damage)
     {
-        // Not needed with direct assignment limiting, but kept for compatibility
+        if (target == null) return;
+        if (inFlightDamage.ContainsKey(target))
+        {
+            inFlightDamage[target] -= damage;
+            if (inFlightDamage[target] < 0) inFlightDamage[target] = 0;
+        }
     }
 
     private void UpdateAssignments()
@@ -56,83 +70,115 @@ public class TargetingManager : MonoBehaviour
 
         turretAssignments.Clear();
 
-        if (enemyObjs.Length == 0 || turretObjs.Length == 0)
-        {
-            return;
-        }
+        if (enemyObjs.Length == 0 || turretObjs.Length == 0) return;
 
-        List<TurretController> availableTurrets = new List<TurretController>();
+        List<TurretInfo> availableTurrets = new List<TurretInfo>();
+        
         foreach (GameObject tObj in turretObjs)
         {
+            if (tObj == null) continue;
             TurretController tc = tObj.GetComponent<TurretController>();
-            if (tc != null) availableTurrets.Add(tc);
+            if (tc != null) availableTurrets.Add(new TurretInfo { turret = tc, damage = tc.GetTurretData().damage, isCryo = tc.IsCryo() });
         }
 
-        // Prioritize higher damage turrets first
-        availableTurrets.Sort((a, b) => b.GetTurretData().damage.CompareTo(a.GetTurretData().damage));
+        // Heavy hitters lock onto fresh targets first
+        availableTurrets.Sort((a, b) => b.damage.CompareTo(a.damage));
 
         List<Transform> activeEnemies = new List<Transform>();
         foreach (GameObject eObj in enemyObjs)
         {
             if (eObj != null) activeEnemies.Add(eObj.transform);
         }
-        // Sort strictly by proximity to core (lowest X position first)
+        
+        // Closest to the core gets priority
         activeEnemies.Sort((a, b) => a.position.x.CompareTo(b.position.x));
 
-        // Track how many turrets are currently assigned to each enemy
-        Dictionary<Transform, int> enemyAssignmentCounts = new Dictionary<Transform, int>();
+        Dictionary<Transform, int> projectedDamage = new Dictionary<Transform, int>();
+        foreach (var kvp in inFlightDamage)
+        {
+            if (kvp.Key != null) projectedDamage[kvp.Key] = kvp.Value;
+        }
 
-        foreach (TurretController turret in availableTurrets)
+        foreach (TurretInfo tInfo in availableTurrets)
         {
             Transform chosenEnemy = null;
+            Transform fallbackFrozenEnemy = null;
 
-            // Find the closest enemy that has fewer than 2 turrets targeting it (assuming 2 bullets/turrets are enough to kill a 100 HP enemy with 50 damage)
             foreach (Transform enemy in activeEnemies)
             {
                 if (enemy == null) continue;
 
-                int assignedCount = enemyAssignmentCounts.ContainsKey(enemy) ? enemyAssignmentCounts[enemy] : 0;
+                int currentHp = GetEnemyHealth(enemy);
+                int incomingDmg = projectedDamage.ContainsKey(enemy) ? projectedDamage[enemy] : 0;
 
-                // Limit to 2 turrets per enemy at a time to prevent unnecessary overkills
-                if (assignedCount < 2)
+                // TACTICAL CHECK: Is the enemy still mathematically alive?
+                if (currentHp - incomingDmg > 0)
                 {
+                    if (tInfo.isCryo)
+                    {
+                        // Prioritize unfrozen. If frozen, save as fallback and keep looking.
+                        if (IsEnemyFrozen(enemy))
+                        {
+                            if (fallbackFrozenEnemy == null) fallbackFrozenEnemy = enemy;
+                            continue;
+                        }
+                    }
+                    
                     chosenEnemy = enemy;
                     break;
                 }
             }
 
-            // Fallback: if all enemies already have 2 turrets, target the absolute closest one anyway
-            if (chosenEnemy == null && activeEnemies.Count > 0)
+            // CRYO FALLBACK: If all living enemies are already frozen, shoot the closest frozen one to keep doing damage
+            if (chosenEnemy == null && tInfo.isCryo && fallbackFrozenEnemy != null)
+            {
+                chosenEnemy = fallbackFrozenEnemy;
+            }
+
+            // GENERAL FALLBACK: If all enemies are marked for death, shoot the closest body to prevent idling
+            if (chosenEnemy == null)
             {
                 chosenEnemy = activeEnemies[0];
             }
 
             if (chosenEnemy != null)
             {
-                turretAssignments[turret] = chosenEnemy;
-                if (!enemyAssignmentCounts.ContainsKey(chosenEnemy)) enemyAssignmentCounts[chosenEnemy] = 0;
-                enemyAssignmentCounts[chosenEnemy]++;
+                turretAssignments[tInfo.turret] = chosenEnemy;
+                if (!projectedDamage.ContainsKey(chosenEnemy)) projectedDamage[chosenEnemy] = 0;
+                
+                projectedDamage[chosenEnemy] += tInfo.damage;
             }
         }
     }
 
-    private Transform FindBestTargetForTurret(TurretController turret)
+    private int GetEnemyHealth(Transform enemy)
     {
-        GameObject[] enemyObjs = GameObject.FindGameObjectsWithTag("Enemy");
-        if (enemyObjs.Length == 0) return null;
+        if (enemy == null) return 0;
+        EnemyContext ctx = enemy.GetComponent<EnemyContext>();
+        if (ctx != null) return ctx.GetCurrentHealth();
+        
+        LaserDroneController drone = enemy.GetComponent<LaserDroneController>();
+        if (drone != null) return drone.GetCurrentHealth();
 
-        Transform closest = null;
-        float minX = float.MaxValue;
+        EnemyController ctrl = enemy.GetComponent<EnemyController>();
+        if (ctrl != null) return ctrl.GetCurrentHealth();
 
-        foreach (GameObject e in enemyObjs)
-        {
-            if (e != null && e.transform.position.x < minX)
-            {
-                minX = e.transform.position.x;
-                closest = e.transform;
-            }
-        }
-        return closest ?? enemyObjs[0].transform;
+        return 100;
+    }
+
+    private bool IsEnemyFrozen(Transform enemy)
+    {
+        if (enemy == null) return false;
+        EnemyContext ctx = enemy.GetComponent<EnemyContext>();
+        if (ctx != null) return ctx.IsFrozen();
+        
+        LaserDroneController drone = enemy.GetComponent<LaserDroneController>();
+        if (drone != null) return drone.IsFrozen();
+
+        EnemyController ctrl = enemy.GetComponent<EnemyController>();
+        if (ctrl != null) return ctrl.IsFrozen();
+
+        return false;
     }
 
     private void CleanCollections()
@@ -140,10 +186,13 @@ public class TargetingManager : MonoBehaviour
         List<TurretController> keys = new List<TurretController>(turretAssignments.Keys);
         foreach (var key in keys)
         {
-            if (key == null || turretAssignments[key] == null)
-            {
-                turretAssignments.Remove(key);
-            }
+            if (key == null || turretAssignments[key] == null) turretAssignments.Remove(key);
+        }
+
+        List<Transform> inFlightKeys = new List<Transform>(inFlightDamage.Keys);
+        foreach (var key in inFlightKeys)
+        {
+            if (key == null) inFlightDamage.Remove(key);
         }
     }
 }

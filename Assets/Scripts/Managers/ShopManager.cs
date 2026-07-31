@@ -8,16 +8,20 @@ public class ShopManager : MonoBehaviour
 
     [Header("Shop Configuration")]
     [SerializeField] private GameObject turretPrefab; 
-    [SerializeField] private GameObject sniperTurretPrefab; // Added Sniper Prefab
+    [SerializeField] private GameObject sniperTurretPrefab;
     [SerializeField] private GameObject bombPrefab;
+    [SerializeField] private GameObject cryoTurretPrefab; 
+    
     [SerializeField] private int baseTurretCost = 100;
-    [SerializeField] private int sniperTurretCost = 200;    // Added Sniper Cost
+    [SerializeField] private int sniperTurretCost = 200;
     [SerializeField] private int bombCost = 50;
+    [SerializeField] private int cryoTurretCost = 150;
 
     [Header("UI References")]
     [SerializeField] private Button turretButton1; 
-    [SerializeField] private Button sniperButton;         // Added Sniper Button Reference
+    [SerializeField] private Button sniperButton;         
     [SerializeField] private Button bombButton; 
+    [SerializeField] private Button cryoButton;           
     [SerializeField] private TextMeshProUGUI currentBuyingText; 
 
     private bool isBuyingMode = false;
@@ -46,6 +50,22 @@ public class ShopManager : MonoBehaviour
         {
             bombButton.onClick.AddListener(() => SelectItemToBuy("Tactical Bomb", bombCost, bombPrefab));
         }
+
+        // Explicitly check and hook up the Cryo button to TurretButton_4
+        if (cryoButton == null)
+        {
+            GameObject btnObj = GameObject.Find("TurretButton_4");
+            if (btnObj != null)
+            {
+                cryoButton = btnObj.GetComponent<Button>();
+            }
+        }
+
+        if (cryoButton != null)
+        {
+            cryoButton.onClick.AddListener(() => SelectItemToBuy("Cryo Emitter", cryoTurretCost, cryoTurretPrefab));
+        }
+
         UpdateBuyingText();
     }
 
@@ -84,6 +104,7 @@ public class ShopManager : MonoBehaviour
     {
         if (selectedItemName == "Laser Sniper") return sniperTurretCost;
         if (selectedItemName == "Tactical Bomb") return bombCost;
+        if (selectedItemName == "Cryo Emitter") return cryoTurretCost;
         return baseTurretCost;
     }
 
@@ -120,7 +141,7 @@ public class ShopManager : MonoBehaviour
         {
             if (isBuyingMode)
             {
-                currentBuyingText.text = $"Currently Buying: <color=#1AE6FF>{selectedItemName}</color>";
+                currentBuyingText.text = $"Currently Buying: <color=#00E5FF>{selectedItemName}</color>";
             }
             else
             {
