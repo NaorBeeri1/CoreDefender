@@ -33,9 +33,9 @@ public class TurretController : MonoBehaviour
 
     [Header("UI & Health Bar Customization")]
     [SerializeField] private GameObject turretCanvasPrefab;
-    [SerializeField] private Vector3 canvasOffset = new Vector3(0f, 0.6f, 0f); // Tweak height position here in Inspector
-    [SerializeField] private Vector3 canvasScale = new Vector3(0.02f, 0.02f, 0.02f); // Tweak overall size here in Inspector
-    [SerializeField] private Vector2 barSize = new Vector2(100f, 18f); // Tweak bar width/height here in Inspector
+    [SerializeField] private Vector3 canvasOffset = new Vector3(0f, 0.5f, 0f); // Height position above turret
+    [SerializeField] private Vector3 canvasScale = new Vector3(0.015f, 0.015f, 0.015f); // Overall scale of the world canvas
+    [SerializeField] private Vector2 barSize = new Vector2(100f, 16f); // Actual graphical width and height of the bar
 
     private GameObject activeHeatCanvas;
     private Image fillBarImage;
@@ -63,6 +63,7 @@ public class TurretController : MonoBehaviour
             activeHeatCanvas = Instantiate(turretCanvasPrefab, transform.position + canvasOffset, Quaternion.identity, transform);
             activeHeatCanvas.transform.localScale = canvasScale;
 
+            // Resize the Background Bar container directly
             Transform bgTrans = activeHeatCanvas.transform.Find("BackgroundBar");
             if (bgTrans != null)
             {
@@ -70,27 +71,18 @@ public class TurretController : MonoBehaviour
                 bgRt.sizeDelta = barSize;
             }
 
+            // Find the FillBar image component for the visual meter
             Transform fillTrans = activeHeatCanvas.transform.Find("BackgroundBar/FillBar");
-            if (fillTrans != null) fillBarImage = fillTrans.GetComponent<Image>();
-
-            Transform hpTrans = activeHeatCanvas.transform.Find("BackgroundBar/TurretHPText");
-            if (hpTrans == null)
+            if (fillTrans != null)
             {
-                GameObject hpTextObj = new GameObject("TurretHPText", typeof(RectTransform), typeof(TextMeshProUGUI));
-                hpTextObj.transform.SetParent(activeHeatCanvas.transform.Find("BackgroundBar"), false);
-                
-                RectTransform rt = hpTextObj.GetComponent<RectTransform>();
-                rt.anchorMin = new Vector2(0f, 1f);
-                rt.anchorMax = new Vector2(1f, 1f);
-                rt.anchoredPosition = new Vector2(0f, 14f);
-                rt.sizeDelta = new Vector2(120f, 25f);
-
-                turretHpText = hpTextObj.GetComponent<TextMeshProUGUI>();
-                turretHpText.fontSize = 13;
-                turretHpText.alignment = TextAlignmentOptions.Center;
-                turretHpText.color = Color.white;
+                fillBarImage = fillTrans.GetComponent<Image>();
+                RectTransform fillRt = fillTrans.GetComponent<RectTransform>();
+                fillRt.sizeDelta = barSize; // Match size
             }
-            else
+
+            // Optional: Find or create text for numeric display
+            Transform hpTrans = activeHeatCanvas.transform.Find("BackgroundBar/TurretHPText");
+            if (hpTrans != null)
             {
                 turretHpText = hpTrans.GetComponent<TextMeshProUGUI>();
             }
@@ -269,10 +261,11 @@ public class TurretController : MonoBehaviour
     {
         if (fillBarImage != null)
         {
+            // If you want the bar to show Health instead of Heat, change currentHeat/maxHeat to (float)currentHealth/maxHealth
             fillBarImage.fillAmount = currentHeat / maxHeat;
             fillBarImage.color = isOverheated ? new Color(1f, 0.102f, 0.302f, 1f) : new Color(0f, 0.902f, 1f, 1f); 
         }
-        if (turretHpText != null) turretHpText.text = $"{currentHealth} / {maxHealth} HP";
+        if (turretHpText != null) turretHpText.text = $"{currentHealth} / {maxHealth}";
     }
 
     private void UpdateTurretVisuals()

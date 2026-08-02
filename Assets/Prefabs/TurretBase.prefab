@@ -110,5 +110,5 @@ MonoBehaviour:
   turretCanvasPrefab: {fileID: 2470467838436904971, guid: 536a99ea2cd1e2a479e0a433f52a9708, type: 3}
   canvasOffset: {x: 0, y: 0.6, z: 0}
   canvasScale: {x: 0.02, y: 0.02, z: 0.02}
-  barSize: {x: 100, y: 18}
+  barSize: {x: 150, y: 20}
   maxHealth: 100
