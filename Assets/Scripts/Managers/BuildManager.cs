@@ -7,10 +7,6 @@ public class BuildManager : MonoBehaviour
     [SerializeField] private GridManager gridManager;
     [SerializeField] private GameObject buildIndicatorPrefab; 
 
-    [Header("Grid Bounds")]
-    [SerializeField] private int gridWidth = 16;
-    [SerializeField] private int gridHeight = 9;
-
     private Camera mainCam;
     private GameObject activeIndicator;
     private Vector2Int currentGridPos;
@@ -19,10 +15,16 @@ public class BuildManager : MonoBehaviour
     {
         mainCam = Camera.main;
 
+        if (gridManager == null)
+        {
+            gridManager = Object.FindAnyObjectByType<GridManager>();
+        }
+
         if (buildIndicatorPrefab != null)
         {
             activeIndicator = Instantiate(buildIndicatorPrefab);
             activeIndicator.name = "BuildIndicator";
+            activeIndicator.SetActive(false);
         }
     }
 
@@ -43,34 +45,28 @@ public class BuildManager : MonoBehaviour
 
     private void UpdateCursorPosition()
     {
-        if (mainCam == null) return;
+        if (mainCam == null || gridManager == null) return;
 
         Vector2 mouseScreenPos = Mouse.current != null ? Mouse.current.position.ReadValue() : Input.mousePosition;
         Vector3 mouseWorldPos = mainCam.ScreenToWorldPoint(mouseScreenPos);
         mouseWorldPos.z = 0f;
 
-        float halfWidth = gridWidth / 2f;
-        float halfHeight = gridHeight / 2f;
+        // Convert world position into exact grid cell coordinates using GridManager
+        currentGridPos = gridManager.WorldToGrid(mouseWorldPos);
 
-        int snappedX = Mathf.FloorToInt(mouseWorldPos.x + halfWidth);
-        int snappedY = Mathf.FloorToInt(mouseWorldPos.y + halfHeight);
-
-        currentGridPos = new Vector2Int(snappedX, snappedY);
-
-        float worldX = snappedX - halfWidth + 0.5f;
-        
-        bool isWithinBounds = snappedX >= 0 && snappedX < gridWidth && snappedY >= 0 && snappedY < gridHeight;
-        bool isSafeDistanceFromCore = worldX > -5.5f; 
-
-        bool canPlaceHere = isWithinBounds && isSafeDistanceFromCore;
+        // Access private width/height via public bounds check or re-derive
+        // Assuming default GridManager width=9, height=6 based on your layout
+        bool isWithinBounds = currentGridPos.x >= 0 && currentGridPos.x < 9 && 
+                              currentGridPos.y >= 0 && currentGridPos.y < 6;
 
         if (activeIndicator != null)
         {
-            activeIndicator.SetActive(canPlaceHere);
-            if (canPlaceHere)
+            activeIndicator.SetActive(isWithinBounds);
+            if (isWithinBounds)
             {
-                float worldY = snappedY - halfHeight + 0.5f;
-                activeIndicator.transform.position = new Vector3(worldX, worldY, 0f);
+                // Snap indicator precisely to the center of the valid grid cell
+                Vector3 cellCenterWorldPos = gridManager.GridToWorld(currentGridPos);
+                activeIndicator.transform.position = cellCenterWorldPos;
             }
         }
     }
@@ -86,37 +82,26 @@ public class BuildManager : MonoBehaviour
                 return;
             }
 
-            float halfWidth = gridWidth / 2f;
-            float halfHeight = gridHeight / 2f;
-
-            if (currentGridPos.x < 0 || currentGridPos.x >= gridWidth || currentGridPos.y < 0 || currentGridPos.y >= gridHeight)
+            if (currentGridPos.x < 0 || currentGridPos.x >= 9 || currentGridPos.y < 0 || currentGridPos.y >= 6)
             {
-                return; 
+                return; // Outside the 6x9 grid bounds
             }
 
-            float spawnX = currentGridPos.x - halfWidth + 0.5f;
-            float spawnY = currentGridPos.y - halfHeight + 0.5f;
-
-            if (spawnX <= -5.5f)
-            {
-                return;
-            }
-
-            Vector3 spawnPos = new Vector3(spawnX, spawnY, 0f);
-
-            GameObject activePrefab = ShopManager.Instance.GetActiveItemPrefab();
-            int itemCost = ShopManager.Instance.GetActiveItemCost();
-
-            if (activePrefab == null) return;
+            Vector3 spawnPos = gridManager.GridToWorld(currentGridPos);
 
             GameObject[] existingStructures = GameObject.FindGameObjectsWithTag("Turret");
             foreach (GameObject t in existingStructures)
             {
                 if (t != null && Vector3.Distance(t.transform.position, spawnPos) <= 0.2f)
                 {
-                    return; 
+                    return; // Cell already occupied
                 }
             }
+
+            GameObject activePrefab = ShopManager.Instance.GetActiveItemPrefab();
+            int itemCost = ShopManager.Instance.GetActiveItemCost();
+
+            if (activePrefab == null) return;
 
             ShopManager.Instance.ConsumePurchase(itemCost);
 

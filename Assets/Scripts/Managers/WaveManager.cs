@@ -86,7 +86,7 @@ public class WaveManager : MonoBehaviour
         totalEnemiesThisWave = Mathf.RoundToInt(5 + (currentWaveNumber * 3));
         enemiesDefeatedThisWave = 0;
 
-        float spawnInterval = Mathf.Max(0.5f, 2.0f - (currentWaveNumber * 0.08f)); 
+        float spawnInterval = Mathf.Max(0.35f, 2.0f - (currentWaveNumber * 0.08f)); 
         float healthMultiplier = 1f + (currentWaveNumber * 0.2f); 
 
         int spawnedCount = 0;

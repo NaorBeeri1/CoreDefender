@@ -31,8 +31,12 @@ public class TurretController : MonoBehaviour
     [SerializeField] private GameObject bulletPrefab;
     [SerializeField] private SpriteRenderer spriteRenderer; 
 
-    [Header("UI References")]
+    [Header("UI & Health Bar Customization")]
     [SerializeField] private GameObject turretCanvasPrefab;
+    [SerializeField] private Vector3 canvasOffset = new Vector3(0f, 0.6f, 0f); // Tweak height position here in Inspector
+    [SerializeField] private Vector3 canvasScale = new Vector3(0.02f, 0.02f, 0.02f); // Tweak overall size here in Inspector
+    [SerializeField] private Vector2 barSize = new Vector2(100f, 18f); // Tweak bar width/height here in Inspector
+
     private GameObject activeHeatCanvas;
     private Image fillBarImage;
     private TextMeshProUGUI turretHpText; 
@@ -56,7 +60,16 @@ public class TurretController : MonoBehaviour
 
         if (turretCanvasPrefab != null)
         {
-            activeHeatCanvas = Instantiate(turretCanvasPrefab, transform.position + new Vector3(0f, 0.65f, 0f), Quaternion.identity, transform);
+            activeHeatCanvas = Instantiate(turretCanvasPrefab, transform.position + canvasOffset, Quaternion.identity, transform);
+            activeHeatCanvas.transform.localScale = canvasScale;
+
+            Transform bgTrans = activeHeatCanvas.transform.Find("BackgroundBar");
+            if (bgTrans != null)
+            {
+                RectTransform bgRt = bgTrans.GetComponent<RectTransform>();
+                bgRt.sizeDelta = barSize;
+            }
+
             Transform fillTrans = activeHeatCanvas.transform.Find("BackgroundBar/FillBar");
             if (fillTrans != null) fillBarImage = fillTrans.GetComponent<Image>();
 
@@ -67,15 +80,15 @@ public class TurretController : MonoBehaviour
                 hpTextObj.transform.SetParent(activeHeatCanvas.transform.Find("BackgroundBar"), false);
                 
                 RectTransform rt = hpTextObj.GetComponent<RectTransform>();
-                rt.anchorMin = new Vector2(0.5f, 1f);
-                rt.anchorMax = new Vector2(0.5f, 1f);
-                rt.anchoredPosition = new Vector2(0f, 15f);
-                rt.sizeDelta = new Vector2(100f, 20f);
+                rt.anchorMin = new Vector2(0f, 1f);
+                rt.anchorMax = new Vector2(1f, 1f);
+                rt.anchoredPosition = new Vector2(0f, 14f);
+                rt.sizeDelta = new Vector2(120f, 25f);
 
                 turretHpText = hpTextObj.GetComponent<TextMeshProUGUI>();
-                turretHpText.fontSize = 12;
+                turretHpText.fontSize = 13;
                 turretHpText.alignment = TextAlignmentOptions.Center;
-                turretHpText.color = Color.green; // #00FF00
+                turretHpText.color = Color.white;
             }
             else
             {
@@ -121,7 +134,6 @@ public class TurretController : MonoBehaviour
 
         if (TargetingManager.Instance != null)
         {
-            // 0f forces INFINITE RANGE for all turrets across the entire board
             currentTarget = TargetingManager.Instance.GetAssignedTarget(this, 0f);
         }
 
@@ -144,16 +156,14 @@ public class TurretController : MonoBehaviour
 
     private void FireCryoPulse()
     {
-        // Visual laser trace to target in Cyan
         Debug.DrawLine(transform.position, currentTarget.position, new Color(0f, 0.902f, 1f, 1f), 0.2f);
 
-        float speedMult = 0.5f; // Base: 50% slow
+        float speedMult = 0.5f; 
         float duration = 3.0f;
         
-        if (currentUpgradeLevel == 1) { speedMult = 0.25f; duration = 3.5f; } // Tier 2: 75% slow
-        if (currentUpgradeLevel == 2) { speedMult = 0.0f; duration = 4.0f; }  // Tier 3: 100% dead stop
+        if (currentUpgradeLevel == 1) { speedMult = 0.25f; duration = 3.5f; } 
+        if (currentUpgradeLevel == 2) { speedMult = 0.0f; duration = 4.0f; }  
 
-        // Apply Damage and Slow
         EnemyContext enemyCtx = currentTarget.GetComponent<EnemyContext>();
         if (enemyCtx != null) { enemyCtx.TakeDamage(damage); enemyCtx.ApplySlow(speedMult, duration); }
         else
@@ -204,7 +214,6 @@ public class TurretController : MonoBehaviour
 
             if (isCryo)
             {
-                // Cryo specific +25% HP bump
                 maxHealth = Mathf.RoundToInt(maxHealth * 1.25f);
                 currentHealth = maxHealth;
             }
@@ -261,7 +270,6 @@ public class TurretController : MonoBehaviour
         if (fillBarImage != null)
         {
             fillBarImage.fillAmount = currentHeat / maxHeat;
-            // #00E5FF Cyan for normal, #FF1A4D Neon Red for Overheated
             fillBarImage.color = isOverheated ? new Color(1f, 0.102f, 0.302f, 1f) : new Color(0f, 0.902f, 1f, 1f); 
         }
         if (turretHpText != null) turretHpText.text = $"{currentHealth} / {maxHealth} HP";
