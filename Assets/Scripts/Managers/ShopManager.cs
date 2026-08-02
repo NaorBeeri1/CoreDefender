@@ -11,17 +11,23 @@ public class ShopManager : MonoBehaviour
     [SerializeField] private GameObject sniperTurretPrefab;
     [SerializeField] private GameObject bombPrefab;
     [SerializeField] private GameObject cryoTurretPrefab; 
+    [SerializeField] private GameObject massDriverPrefab;
+    [SerializeField] private GameObject ionBeaconPrefab;
     
     [SerializeField] private int baseTurretCost = 100;
     [SerializeField] private int sniperTurretCost = 200;
     [SerializeField] private int bombCost = 50;
     [SerializeField] private int cryoTurretCost = 150;
+    [SerializeField] private int massDriverCost = 350;
+    [SerializeField] private int ionBeaconCost = 500;
 
     [Header("UI References")]
     [SerializeField] private Button turretButton1; 
-    [SerializeField] private Button sniperButton;         
+    [SerializeField] private Button sniperButton;          
     [SerializeField] private Button bombButton; 
-    [SerializeField] private Button cryoButton;           
+    [SerializeField] private Button cryoButton;            
+    [SerializeField] private Button turretButton5;
+    [SerializeField] private Button turretButton6;         
     [SerializeField] private TextMeshProUGUI currentBuyingText; 
 
     private bool isBuyingMode = false;
@@ -51,7 +57,7 @@ public class ShopManager : MonoBehaviour
             bombButton.onClick.AddListener(() => SelectItemToBuy("Tactical Bomb", bombCost, bombPrefab));
         }
 
-        // Explicitly check and hook up the Cryo button to TurretButton_4
+        // Cryo button fallback and listener
         if (cryoButton == null)
         {
             GameObject btnObj = GameObject.Find("TurretButton_4");
@@ -64,6 +70,36 @@ public class ShopManager : MonoBehaviour
         if (cryoButton != null)
         {
             cryoButton.onClick.AddListener(() => SelectItemToBuy("Cryo Emitter", cryoTurretCost, cryoTurretPrefab));
+        }
+
+        // Mass Driver button fallback and listener (Slot 5)
+        if (turretButton5 == null)
+        {
+            GameObject btnObj = GameObject.Find("TurretButton_5");
+            if (btnObj != null)
+            {
+                turretButton5 = btnObj.GetComponent<Button>();
+            }
+        }
+
+        if (turretButton5 != null)
+        {
+            turretButton5.onClick.AddListener(() => SelectItemToBuy("Mass Driver", massDriverCost, massDriverPrefab));
+        }
+
+        // Ion Beacon button fallback and listener (Slot 6)
+        if (turretButton6 == null)
+        {
+            GameObject btnObj = GameObject.Find("TurretButton_6");
+            if (btnObj != null)
+            {
+                turretButton6 = btnObj.GetComponent<Button>();
+            }
+        }
+
+        if (turretButton6 != null)
+        {
+            turretButton6.onClick.AddListener(() => SelectItemToBuy("Ion Beacon", ionBeaconCost, ionBeaconPrefab));
         }
 
         UpdateBuyingText();
@@ -105,6 +141,8 @@ public class ShopManager : MonoBehaviour
         if (selectedItemName == "Laser Sniper") return sniperTurretCost;
         if (selectedItemName == "Tactical Bomb") return bombCost;
         if (selectedItemName == "Cryo Emitter") return cryoTurretCost;
+        if (selectedItemName == "Mass Driver") return massDriverCost;
+        if (selectedItemName == "Ion Beacon") return ionBeaconCost;
         return baseTurretCost;
     }
 

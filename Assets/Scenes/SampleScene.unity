@@ -2114,6 +2114,63 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1001 &627021297
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 2557564434888870594, guid: 81fba1086953bf6408358963121faf09, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 3.28341
+      objectReference: {fileID: 0}
+    - target: {fileID: 2557564434888870594, guid: 81fba1086953bf6408358963121faf09, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 5.20557
+      objectReference: {fileID: 0}
+    - target: {fileID: 2557564434888870594, guid: 81fba1086953bf6408358963121faf09, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2557564434888870594, guid: 81fba1086953bf6408358963121faf09, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2557564434888870594, guid: 81fba1086953bf6408358963121faf09, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2557564434888870594, guid: 81fba1086953bf6408358963121faf09, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2557564434888870594, guid: 81fba1086953bf6408358963121faf09, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2557564434888870594, guid: 81fba1086953bf6408358963121faf09, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2557564434888870594, guid: 81fba1086953bf6408358963121faf09, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2557564434888870594, guid: 81fba1086953bf6408358963121faf09, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3812622200610940158, guid: 81fba1086953bf6408358963121faf09, type: 3}
+      propertyPath: m_Name
+      value: IonBeaconTurret
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 81fba1086953bf6408358963121faf09, type: 3}
 --- !u!1 &631328519
 GameObject:
   m_ObjectHideFlags: 0
@@ -2601,14 +2658,20 @@ MonoBehaviour:
   sniperTurretPrefab: {fileID: 8397219193441616641, guid: 37d128dc40dade54e85bdff5fda8b3f9, type: 3}
   bombPrefab: {fileID: 3812622200610940158, guid: 43ca316795b785542bde7b1b79822332, type: 3}
   cryoTurretPrefab: {fileID: 3812622200610940158, guid: 9be8edc0db45bee49a7059704d517c80, type: 3}
+  massDriverPrefab: {fileID: 0}
+  ionBeaconPrefab: {fileID: 0}
   baseTurretCost: 100
   sniperTurretCost: 200
   bombCost: 50
   cryoTurretCost: 150
+  massDriverCost: 350
+  ionBeaconCost: 500
   turretButton1: {fileID: 2099242154}
   sniperButton: {fileID: 170813277}
   bombButton: {fileID: 1351915594}
   cryoButton: {fileID: 1716472600}
+  turretButton5: {fileID: 779310592}
+  turretButton6: {fileID: 33922752}
   currentBuyingText: {fileID: 1253840044}
 --- !u!4 &847394708
 Transform:
@@ -3897,6 +3960,63 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1001 &1472709138
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 2557564434888870594, guid: f612f7b4ea74b0a4ab49a804088b8aac, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 3.28341
+      objectReference: {fileID: 0}
+    - target: {fileID: 2557564434888870594, guid: f612f7b4ea74b0a4ab49a804088b8aac, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 5.20557
+      objectReference: {fileID: 0}
+    - target: {fileID: 2557564434888870594, guid: f612f7b4ea74b0a4ab49a804088b8aac, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2557564434888870594, guid: f612f7b4ea74b0a4ab49a804088b8aac, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2557564434888870594, guid: f612f7b4ea74b0a4ab49a804088b8aac, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2557564434888870594, guid: f612f7b4ea74b0a4ab49a804088b8aac, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2557564434888870594, guid: f612f7b4ea74b0a4ab49a804088b8aac, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2557564434888870594, guid: f612f7b4ea74b0a4ab49a804088b8aac, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2557564434888870594, guid: f612f7b4ea74b0a4ab49a804088b8aac, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2557564434888870594, guid: f612f7b4ea74b0a4ab49a804088b8aac, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3812622200610940158, guid: f612f7b4ea74b0a4ab49a804088b8aac, type: 3}
+      propertyPath: m_Name
+      value: MassDriverTurret
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: f612f7b4ea74b0a4ab49a804088b8aac, type: 3}
 --- !u!1 &1475727200
 GameObject:
   m_ObjectHideFlags: 0
@@ -4349,7 +4469,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Locked\n---
+  m_text: Ion Beacon\n500c
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -5203,7 +5323,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Locked\n---
+  m_text: Mass Driver\n350c
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -5613,3 +5733,5 @@ SceneRoots:
   - {fileID: 154282524}
   - {fileID: 732430258}
   - {fileID: 847394708}
+  - {fileID: 627021297}
+  - {fileID: 1472709138}

@@ -86,7 +86,6 @@ public class TurretController : MonoBehaviour
 
     private void InitializeData()
     {
-        // Extracts data from your ScriptableObjects. Detects if it's the Cryo Emitter.
         if (turretDataAsset is SniperTurretData sniperData)
         {
             ApplyStats(sniperData.turretName, sniperData.fireRate, sniperData.attackRange, sniperData.damage, sniperData.maxHeat, sniperData.heatPerShot, sniperData.coolingRate, sniperData.currentUpgradeLevel, sniperData.maxUpgradeLevel, sniperData.upgradeCost, sniperData.fireRateMultiplier, sniperData.damageUpgradeBonus, sniperData.healthUpgradeBonus, sniperData.coolingRateMultiplier, sniperData.upgradeSprites);
@@ -95,11 +94,19 @@ public class TurretController : MonoBehaviour
         {
             ApplyStats(normalData.turretName, normalData.fireRate, normalData.attackRange, normalData.damage, normalData.maxHeat, normalData.heatPerShot, normalData.coolingRate, normalData.currentUpgradeLevel, normalData.maxUpgradeLevel, normalData.upgradeCost, normalData.fireRateMultiplier, normalData.damageUpgradeBonus, normalData.healthUpgradeBonus, normalData.coolingRateMultiplier, normalData.upgradeSprites);
         }
+        else if (turretDataAsset is MassDriverData mdData)
+        {
+            ApplyStats(mdData.turretName, mdData.fireRate, mdData.attackRange, mdData.damage, mdData.maxHeat, mdData.heatPerShot, mdData.coolingRate, mdData.currentUpgradeLevel, mdData.maxUpgradeLevel, mdData.upgradeCost, mdData.fireRateMultiplier, mdData.damageUpgradeBonus, mdData.healthUpgradeBonus, mdData.coolingRateMultiplier, mdData.upgradeSprites);
+        }
+        else if (turretDataAsset is IonBeaconData ibData)
+        {
+            ApplyStats(ibData.turretName, ibData.fireRate, ibData.attackRange, ibData.damage, ibData.maxHeat, ibData.heatPerShot, ibData.coolingRate, ibData.currentUpgradeLevel, ibData.maxUpgradeLevel, ibData.upgradeCost, ibData.fireRateMultiplier, ibData.damageUpgradeBonus, ibData.healthUpgradeBonus, ibData.coolingRateMultiplier, ibData.upgradeSprites);
+        }
 
         if (turretName.Contains("Cryo"))
         {
             isCryo = true;
-            maxUpgradeLevel = 2; // Level 0 (Base), Level 1 (75% Slow), Level 2 (Full Freeze)
+            maxUpgradeLevel = 2;
         }
     }
 
