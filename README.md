@@ -1,8 +1,8 @@
-# 🛡️ CoreDefender
+# 🛡️ Core Defender
 
-**CoreDefender** is a tactical 2D tower defense game built from scratch in Unity. Defend your energy core against waves of hostile units by strategically placing, upgrading, and managing thermal limits across a variety of defensive structures.
+**Core Defender** is a tactical 2D tower defense game built from scratch in Unity. Defend your energy core against waves of hostile units by strategically placing, upgrading, and managing thermal limits across a variety of defensive structures.
 
-🎮 **[Play CoreDefender on Itch.io](https://studios-nb.itch.io/coredefender)**
+🎮 **[Play Core Defender on Itch.io](https://studios-nb.itch.io/coredefender)**
 
 ---
 
@@ -28,4 +28,4 @@
 ## 🚀 How to Play
 1. Visit the [Itch.io Page](https://studios-nb.itch.io/coredefender) to download the build.
 2. Extract the `.zip` archive.
-3. Run `CoreDefender.exe` and protect the core!
+3. Run `Core Defender.exe` and protect the core!
